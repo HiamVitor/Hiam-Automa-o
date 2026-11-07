@@ -13,6 +13,33 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
 
+    <!-- Firebase SDK Config / Inicialização -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDyft_hnFxcdA4tBU5Uv1UkRNBr8r1JEY",
+            authDomain: "teste-a69c4.firebaseapp.com",
+            projectId: "teste-a69c4",
+            storageBucket: "teste-a69c4.firebasestorage.app",
+            messagingSenderId: "62432958325",
+            appId: "1:62432958325:web:35a836c8f9330ab7aee53c",
+            measurementId: "G-XZJ991DGXR"
+        };
+
+        // Inicializar Firebase e Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Disponibilizar globalmente para o script.js usar
+        window.db = db;
+        window.dbHelpers = { doc, setDoc, getDoc, onSnapshot };
+        
+        // Disparar evento de que o Firebase está pronto
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="w-80 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between select-none shadow-2xl z-20">
         <div>
@@ -768,3 +795,4 @@
     <script src="js/script.js"></script>
 </body>
 </html>
+```[cite: 1]

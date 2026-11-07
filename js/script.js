@@ -121,11 +121,102 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = null;
 
+// Função unificada para salvar na nuvem do Firestore
+async function salvarDadosNuvem() {
+    if (!window.db || !window.dbHelpers) return;
+    try {
+        await window.dbHelpers.setDoc(window.dbHelpers.doc(window.db, "dados", "principal"), {
+            mediaList: typeof mediaList !== 'undefined' ? mediaList : [],
+            acessosList: typeof acessosList !== 'undefined' ? acessosList : [],
+            senhasPessoaisList: typeof senhasPessoaisList !== 'undefined' ? senhasPessoaisList : [],
+            adminsList: typeof adminsList !== 'undefined' ? adminsList : [],
+            atualizadoEm: new Date().toISOString()
+        });
+    } catch (e) {
+        console.error("Erro ao sincronizar com a nuvem:", e);
+    }
+}
+
+// Função para carregar os dados da nuvem ao iniciar
+async function carregarDadosNuvem() {
+    if (!window.db || !window.dbHelpers) return;
+    try {
+        const docSnap = await window.dbHelpers.getDoc(window.dbHelpers.doc(window.db, "dados", "principal"));
+        if (docSnap.exists()) {
+            const dados = docSnap.data();
+            
+            if (dados.mediaList && typeof mediaList !== 'undefined') mediaList = dados.mediaList;
+            if (dados.acessosList && typeof acessosList !== 'undefined') acessosList = dados.acessosList;
+            if (dados.senhasPessoaisList && typeof senhasPessoaisList !== 'undefined') senhasPessoaisList = dados.senhasPessoaisList;
+            if (dados.adminsList && typeof adminsList !== 'undefined') {
+                adminsList = dados.adminsList;
+                if (adminsList.length === 0) {
+                    adminsList.push({
+                        id: Date.now(),
+                        nome: "Administrador Inicial",
+                        login: "admin",
+                        senha: "123",
+                        vip: true
+                    });
+                }
+            }
+
+            salvarNoLocalStorage();
+
+            // Re-renderizar as telas ativas se as funções existirem
+            if (typeof renderMediaList === 'function') {
+                renderMediaList('filmes');
+                renderMediaList('series');
+                renderMediaList('animes');
+            }
+            if (typeof renderAcessos === 'function') renderAcessos();
+            if (typeof renderContasCasa === 'function') renderContasCasa();
+            if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
+            if (typeof renderAdmins === 'function') renderAdmins();
+        }
+    } catch (e) {
+        console.error("Erro ao carregar dados da nuvem:", e);
+    }
+}
+
+// Ouve alterações em tempo real (se alterar no telemóvel, o notebook atualiza sozinho instantaneamente)
+window.addEventListener('firebase-ready', () => {
+    carregarDadosNuvem();
+    
+    if (window.db && window.dbHelpers) {
+        window.dbHelpers.onSnapshot(window.dbHelpers.doc(window.db, "dados", "principal"), (docSnap) => {
+            if (docSnap.exists()) {
+                const dados = docSnap.data();
+                
+                if (dados.mediaList && typeof mediaList !== 'undefined') mediaList = dados.mediaList;
+                if (dados.acessosList && typeof acessosList !== 'undefined') acessosList = dados.acessosList;
+                if (dados.senhasPessoaisList && typeof senhasPessoaisList !== 'undefined') senhasPessoaisList = dados.senhasPessoaisList;
+                if (dados.adminsList && typeof adminsList !== 'undefined') adminsList = dados.adminsList;
+                
+                salvarNoLocalStorage();
+
+                if (typeof renderMediaList === 'function') {
+                    renderMediaList('filmes');
+                    renderMediaList('series');
+                    renderMediaList('animes');
+                }
+                if (typeof renderAcessos === 'function') renderAcessos();
+                if (typeof renderContasCasa === 'function') renderContasCasa();
+                if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
+                if (typeof renderAdmins === 'function') renderAdmins();
+            }
+        });
+    }
+});
+
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
     localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
     localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
+    
+    // Sempre que salvar localmente, sincroniza com o Firestore
+    salvarDadosNuvem();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
