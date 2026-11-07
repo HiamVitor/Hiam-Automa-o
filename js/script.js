@@ -1,33 +1,3 @@
-let menuMinimizado = false;
-
-function toggleMinimizarSidebar() {
-    menuMinimizado = !menuMinimizado;
-    const sidebar = document.getElementById('sidebar-principal');
-    const iconeToggle = document.getElementById('icone-toggle-sidebar');
-    const tituloContainer = document.getElementById('sidebar-title-container');
-    const labelMenuNav = document.getElementById('label-menu-nav');
-    const navTextos = document.querySelectorAll('.nav-text');
-    const footerTextos = document.querySelectorAll('.sidebar-footer-text');
-
-    if (menuMinimizado) {
-        sidebar.classList.remove('w-80');
-        sidebar.classList.add('w-24');
-        iconeToggle.className = "fa-solid fa-angles-right text-xs";
-        if (tituloContainer) tituloContainer.style.display = 'none';
-        if (labelMenuNav) labelMenuNav.style.display = 'none';
-        navTextos.forEach(el => el.style.display = 'none');
-        footerTextos.forEach(el => el.style.display = 'none');
-    } else {
-        sidebar.classList.remove('w-24');
-        sidebar.classList.add('w-80');
-        iconeToggle.className = "fa-solid fa-angles-left text-xs";
-        if (tituloContainer) tituloContainer.style.display = 'block';
-        if (labelMenuNav) labelMenuNav.style.display = 'block';
-        navTextos.forEach(el => el.style.display = 'inline');
-        footerTextos.forEach(el => el.style.display = 'inline');
-    }
-}
-
 // Normaliza as chaves das temporadas para uma sequência limpa: 1, 2, 3...
 function normalizarTemporadasSequenciais(temporadasDados) {
     const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
@@ -74,13 +44,23 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
     }
 ];
 
-let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
+let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [
+    {
+        id: 1,
+        userLogin: "admin",
+        servico: "GitHub",
+        url: "https://github.com",
+        login: "hiamvitor",
+        senha: "HiamGitHub2026!"
+    }
+];
+
 let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
 
 if (adminsList.length === 0) {
     adminsList.push({
         id: Date.now(),
-        nome: "Hiam Vitor Biff de Souza",
+        nome: "Administrador Inicial",
         login: "admin",
         senha: "123",
         vip: true
@@ -91,7 +71,6 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
-// Salva localmente e sincroniza imediatamente com o Firebase na coleção 'dados', documento 'principal'[cite: 3]
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -116,7 +95,6 @@ function salvarNoLocalStorage() {
     }
 }
 
-// Carrega os dados da nuvem e mantém a escuta ativa em tempo real para todos os dispositivos[cite: 1, 3]
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
@@ -280,21 +258,7 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     const nomeInput = document.getElementById('input-nome').value.trim();
     const tipo = document.getElementById('input-tipo').value;
-    const btnSubmit = document.getElementById('btn-submit-media');
-    const progressContainer = document.getElementById('loading-progress-container');
-    const progressFill = document.getElementById('loading-bar-fill');
-    const progressPercent = document.getElementById('loading-percent-text');
-    const statusText = document.getElementById('loading-status-text');
-
-    if (btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-    if (progressContainer) progressContainer.classList.remove('hidden');
-    if (progressFill) progressFill.style.width = '20%';
-    if (progressPercent) progressPercent.innerText = '20%';
-    if (statusText) statusText.innerText = 'A ligar à API oficial...';
-
+    
     let dadosMidia = {
         genero: tipo === 'Filme' ? "Filme / Ação" : (tipo === 'Anime' ? "Anime / Ação / Aventura" : "Ação / Aventura / Fantasia"),
         resumo: `Informações detalhadas sobre ${nomeInput} obtidas do catálogo oficial.`,
@@ -310,10 +274,6 @@ async function handleFormSubmit(event) {
     };
 
     try {
-        if (progressFill) progressFill.style.width = '50%';
-        if (progressPercent) progressPercent.innerText = '50%';
-        if (statusText) statusText.innerText = 'A obter episódios e resumos...';
-
         const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
         if (response.ok) {
             const show = await response.json();
@@ -329,10 +289,6 @@ async function handleFormSubmit(event) {
             dadosMidia.lancamento = show.premiered || "2024-01-01";
             dadosMidia.termino = show.ended || "Em andamento";
             if (show.image && show.image.original) dadosMidia.poster = show.image.original;
-
-            if (progressFill) progressFill.style.width = '80%';
-            if (progressPercent) progressPercent.innerText = '80%';
-            if (statusText) statusText.innerText = 'A traduzir conteúdos para português...';
 
             if (show._embedded && Array.isArray(show._embedded.episodes)) {
                 const temporadasMap = {};
@@ -354,10 +310,6 @@ async function handleFormSubmit(event) {
         console.error("Erro API:", e);
     }
 
-    if (progressFill) progressFill.style.width = '100%';
-    if (progressPercent) progressPercent.innerText = '100%';
-    if (statusText) statusText.innerText = 'Concluído com sucesso!';
-
     mediaList.push({
         id: Date.now(),
         nome: nomeInput,
@@ -372,20 +324,12 @@ async function handleFormSubmit(event) {
         avaliacao: 0
     });
 
-    setTimeout(() => {
-        salvarNoLocalStorage();
-        closeModal();
-        if (progressContainer) progressContainer.classList.add('hidden');
-        if (progressFill) progressFill.style.width = '0%';
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+    salvarNoLocalStorage();
+    closeModal();
 
-        if (tipo === 'Filme') switchSubPage('filmes');
-        else if (tipo === 'Série') switchSubPage('series');
-        else if (tipo === 'Anime') switchSubPage('animes');
-    }, 400);
+    if (tipo === 'Filme') switchSubPage('filmes');
+    else if (tipo === 'Série') switchSubPage('series');
+    else if (tipo === 'Anime') switchSubPage('animes');
 }
 
 async function recarregarInformacoesTitulo() {
@@ -1176,7 +1120,6 @@ function openAccessModal() {
         alert("Acesso negado! Apenas administradores VIP.");
         return;
     }
-    
     const formAcesso = document.getElementById('access-form');
     if (formAcesso) formAcesso.reset();
 
