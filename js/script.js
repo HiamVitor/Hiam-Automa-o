@@ -53,7 +53,7 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = null;
 
-// Salva localmente e envia para o Firebase em background (sem congelar a tela)
+// Salva localmente e envia para o Firebase no caminho correto: coleção 'dados', documento 'principal'
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -64,12 +64,14 @@ function salvarNoLocalStorage() {
 
     if (window.db && window.dbHelpers) {
         const { doc, setDoc } = window.dbHelpers;
-        setDoc(doc(window.db, "sistema", "dadosGerais"), {
+        setDoc(doc(window.db, "dados", "principal"), {
             mediaList,
             acessosList,
             senhasPessoaisList,
             adminsList,
             ultimaAtualizacao: new Date().toISOString()
+        }).then(() => {
+            console.log("Dados sincronizados com sucesso na nuvem do Firebase.");
         }).catch(e => {
             console.error("Erro ao sincronizar com o Firebase:", e);
         });
@@ -81,7 +83,7 @@ async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
             const { doc, getDoc, onSnapshot } = window.dbHelpers;
-            const docRef = doc(window.db, "sistema", "dadosGerais");
+            const docRef = doc(window.db, "dados", "principal");
             
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
