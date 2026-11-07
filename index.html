@@ -116,7 +116,7 @@
             </div>
             <button onclick="forcarAtualizacaoGeralDispositivos()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-[11px] font-semibold py-2 px-3 rounded-xl border border-slate-700/60 transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-rotate"></i>
-                <span id="timestamp-sync" class="sidebar-footer-text">Atualizar Todos Dispositivos</span>
+                <span class="sidebar-footer-text">Atualizar Todos Dispositivos</span>
             </button>
         </div>
     </aside>
@@ -259,28 +259,20 @@
         </section>
 
         <!-- SUBPÁGINAS E DETALHES -->
-        <!-- SUBPÁGINA: FILMES -->
         <section id="subpage-filmes" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center space-x-4 w-full md:w-auto">
-                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2 shrink-0">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
                     </button>
                     <div>
                         <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold">Catálogo</span>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-1">Filmes</h2>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Filmes</h2>
                     </div>
                 </div>
-                <!-- BARRA DE PESQUISA -->
-                <div class="w-full md:w-72 relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input type="text" id="input-busca-filmes" oninput="filtrarMediaLista('filmes')" placeholder="Pesquisar filme..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-white text-xs focus:outline-none focus:border-cyan-500 transition">
-                </div>
                 <div>
-                    <button onclick="openModal('Filme')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center space-x-2 shrink-0">
+                    <button onclick="openModal('Filme')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Filme</span>
                     </button>
@@ -289,28 +281,20 @@
             <div id="grid-filmes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- SUBPÁGINA: SÉRIES -->
         <section id="subpage-series" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center space-x-4 w-full md:w-auto">
-                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2 shrink-0">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
                     </button>
                     <div>
                         <span class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Catálogo</span>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-1">Séries</h2>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Séries</h2>
                     </div>
                 </div>
-                <!-- BARRA DE PESQUISA -->
-                <div class="w-full md:w-72 relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input type="text" id="input-busca-series" oninput="filtrarMediaLista('series')" placeholder="Pesquisar série..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
-                </div>
                 <div>
-                    <button onclick="openModal('Série')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2 shrink-0">
+                    <button onclick="openModal('Série')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Série</span>
                     </button>
@@ -319,28 +303,20 @@
             <div id="grid-series" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- SUBPÁGINA: ANIMES -->
         <section id="subpage-animes" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center space-x-4 w-full md:w-auto">
-                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2 shrink-0">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
                     </button>
                     <div>
                         <span class="text-xs uppercase tracking-widest text-pink-400 font-bold">Catálogo</span>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-white mt-1">Animes</h2>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Animes</h2>
                     </div>
                 </div>
-                <!-- BARRA DE PESQUISA -->
-                <div class="w-full md:w-72 relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input type="text" id="input-busca-animes" oninput="filtrarMediaLista('animes')" placeholder="Pesquisar anime..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-white text-xs focus:outline-none focus:border-pink-500 transition">
-                </div>
                 <div>
-                    <button onclick="openModal('Anime')" class="bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2 shrink-0">
+                    <button onclick="openModal('Anime')" class="bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Anime</span>
                     </button>
@@ -464,7 +440,7 @@
                     </select>
                 </div>
 
-                <!-- Barra de Progresso de Carregamento -->
+                <!-- Barra de Progresso de Carregamento (Oculta por defeito) -->
                 <div id="loading-progress-container" class="hidden space-y-2 pt-2">
                     <div class="flex justify-between text-xs text-blue-400 font-medium">
                         <span id="loading-status-text">A consultar catálogo e a traduzir...</span>
@@ -485,7 +461,7 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITAR TÍTULO -->
+    <!-- MODAL: EDITAR TÍTULO, INFORMAÇÕES E EPISÓDIOS -->
     <div id="edit-item-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl space-y-6 my-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -541,7 +517,7 @@
                     
                     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
                         <p class="text-[11px] text-slate-400">
-                            Pode copiar as colunas diretamente de uma tabela e colar no campo abaixo:
+                            Pode copiar as colunas diretamente de uma tabela (ex: Temporada | Episódio | Título) e colar no campo abaixo:
                         </p>
                         <textarea id="manual-textarea-massa" rows="4" placeholder="Cole aqui os dados copiados da tabela..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-blue-500"></textarea>
                         
@@ -567,7 +543,7 @@
         </div>
     </div>
 
-    <!-- MODAL ADICIONAR ACESSO -->
+    <!-- MODAL ADICIONAR ACESSO (GERAL) -->
     <div id="access-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -582,7 +558,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
-                    <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos - Morro Estevão" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
@@ -667,7 +643,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
-                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
@@ -714,7 +690,7 @@
                 <input type="hidden" id="personal-id">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Serviço / Site / App</label>
-                    <input type="text" id="pers-servico" required placeholder="Ex: GitHub, Banco..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                    <input type="text" id="pers-servico" required placeholder="Ex: GitHub, Banco, E-mail..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">URL (Link Opcional)</label>
@@ -844,7 +820,1401 @@
         </div>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
-    <script src="script.js"></script>
+    <!-- Script JS Unificado -->
+    <script>
+        let menuMinimizado = false;
+
+        function toggleMinimizarSidebar() {
+            menuMinimizado = !menuMinimizado;
+            const sidebar = document.getElementById('sidebar-principal');
+            const iconeToggle = document.getElementById('icone-toggle-sidebar');
+            const tituloContainer = document.getElementById('sidebar-title-container');
+            const labelMenuNav = document.getElementById('label-menu-nav');
+            const navTextos = document.querySelectorAll('.nav-text');
+            const footerTextos = document.querySelectorAll('.sidebar-footer-text');
+
+            if (menuMinimizado) {
+                sidebar.classList.remove('w-80');
+                sidebar.classList.add('w-24');
+                iconeToggle.className = "fa-solid fa-angles-right text-xs";
+                if (tituloContainer) tituloContainer.style.display = 'none';
+                if (labelMenuNav) labelMenuNav.style.display = 'none';
+                navTextos.forEach(el => el.style.display = 'none');
+                footerTextos.forEach(el => el.style.display = 'none');
+            } else {
+                sidebar.classList.remove('w-24');
+                sidebar.classList.add('w-80');
+                iconeToggle.className = "fa-solid fa-angles-left text-xs";
+                if (tituloContainer) tituloContainer.style.display = 'block';
+                if (labelMenuNav) labelMenuNav.style.display = 'block';
+                navTextos.forEach(el => el.style.display = 'inline');
+                footerTextos.forEach(el => el.style.display = 'inline');
+            }
+        }
+
+        function normalizarTemporadasSequenciais(temporadasDados) {
+            const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
+            const chavesOrdenadas = Object.keys(dados).sort((a, b) => {
+                const numeroA = Number(a);
+                const numeroB = Number(b);
+                if (Number.isFinite(numeroA) && Number.isFinite(numeroB)) return numeroA - numeroB;
+                return a.localeCompare(b, undefined, { numeric: true });
+            });
+            const temporadasNormalizadas = {};
+            chavesOrdenadas.forEach((chaveOriginal, indice) => {
+                temporadasNormalizadas[String(indice + 1)] = Array.isArray(dados[chaveOriginal]) ? dados[chaveOriginal] : [];
+            });
+            return temporadasNormalizadas;
+        }
+
+        let mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || [];
+        let currentActiveCategory = 'filmes';
+        let currentOpenItemId = null;
+        let currentSelectedTemp = 1;
+        let temporadasDadosTempEdicao = {};
+
+        let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
+            {
+                id: 1,
+                nome: "Casa Principal - 235",
+                morada: "Rua Dos Crisântemos - Morro Estevão",
+                tipoConta: "Energia / Luz",
+                nomeSite: "Portal Coopera",
+                portal: "https://portal.coopera.com.br/agenciavirtual3",
+                login: "utilizador@email.com",
+                senha: "Senha.235"
+            },
+            {
+                id: 2,
+                nome: "Casa Principal - 235",
+                morada: "Rua Dos Crisântemos - Morro Estevão",
+                tipoConta: "Água / Saneamento",
+                nomeSite: "Casan",
+                portal: "https://e.casan.com.br/",
+                cpf: "75442280968",
+                matricula: "6706592",
+                senha: "Senha.235"
+            }
+        ];
+
+        let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
+        let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
+
+        if (adminsList.length === 0) {
+            adminsList.push({
+                id: Date.now(),
+                nome: "Administrador Principal",
+                login: "admin",
+                senha: "123",
+                vip: true
+            });
+            localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
+        }
+
+        let tabPendenteParaDesbloquear = '';
+        let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+
+        function salvarNoLocalStorage() {
+            localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
+            localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
+            localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
+            localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
+            
+            atualizarTimestampSyncWeb();
+
+            if (window.db && window.dbHelpers) {
+                const { doc, setDoc } = window.dbHelpers;
+                setDoc(doc(window.db, "dados", "principal"), {
+                    mediaList: JSON.parse(JSON.stringify(mediaList)),
+                    acessosList: JSON.parse(JSON.stringify(acessosList)),
+                    senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
+                    adminsList: JSON.parse(JSON.stringify(adminsList)),
+                    ultimaAtualizacao: new Date().toISOString()
+                }, { merge: true }).then(() => {
+                    console.log("Dados sincronizados com sucesso na nuvem do Firebase.");
+                }).catch(e => {
+                    console.error("Erro ao sincronizar com o Firebase:", e);
+                });
+            }
+        }
+
+        async function carregarDadosDaNuvem() {
+            if (window.db && window.dbHelpers) {
+                try {
+                    const { doc, getDoc, onSnapshot } = window.dbHelpers;
+                    const docRef = doc(window.db, "dados", "principal");
+                    
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const dados = docSnap.data();
+                        if (dados.mediaList) mediaList = dados.mediaList;
+                        if (dados.acessosList) acessosList = dados.acessosList;
+                        if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
+                        if (dados.adminsList) {
+                            adminsList = dados.adminsList;
+                            if (adminLogadoAtual) {
+                                const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                                if (adminAtualizado) {
+                                    adminLogadoAtual = adminAtualizado;
+                                } else {
+                                    adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                                }
+                            }
+                        }
+
+                        renderizarInterfaceCompleta();
+                    }
+
+                    onSnapshot(docRef, (docSnapSnapshot) => {
+                        if (docSnapSnapshot.exists()) {
+                            const dados = docSnapSnapshot.data();
+                            
+                            mediaList = dados.mediaList || mediaList;
+                            acessosList = dados.acessosList || acessosList;
+                            senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
+                            
+                            if (dados.adminsList) {
+                                adminsList = dados.adminsList;
+                                if (adminLogadoAtual) {
+                                    const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                                    if (adminAtualizado) {
+                                        adminLogadoAtual = adminAtualizado;
+                                    }
+                                }
+                            }
+
+                            renderizarInterfaceCompleta();
+                            atualizarTimestampSyncWeb();
+                        }
+                    });
+                } catch (e) {
+                    console.error("Erro ao carregar dados do Firebase:", e);
+                }
+            }
+        }
+
+        function renderizarInterfaceCompleta() {
+            renderAcessos();
+            renderContasCasa();
+            renderSenhasPessoais();
+            renderAdmins();
+            const subpageDetalhes = document.getElementById('subpage-detalhes');
+            if (subpageDetalhes && !subpageDetalhes.classList.contains('hidden')) {
+                renderizarConteudoDetalhes();
+            }
+            if (currentActiveCategory) {
+                const subpageCat = document.getElementById('subpage-' + currentActiveCategory);
+                if (subpageCat && !subpageCat.classList.contains('hidden')) {
+                    renderMediaList(currentActiveCategory);
+                }
+            }
+        }
+
+        function atualizarTimestampSyncWeb() {
+            const el = document.getElementById('timestamp-sync');
+            if (el) {
+                const agora = new Date();
+                el.innerText = `Última sync: ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+            }
+        }
+
+        function forcarAtualizacaoGeralDispositivos() {
+            const labelRede = document.getElementById('label-status-rede');
+            if (labelRede) labelRede.innerText = "A atualizar...";
+
+            carregarDadosDaNuvem();
+
+            setTimeout(() => {
+                renderizarInterfaceCompleta();
+                if (labelRede) labelRede.innerText = "Web Sincronizada";
+                atualizarTimestampSyncWeb();
+                alert("Dispositivos atualizados com sucesso a partir da nuvem!");
+            }, 600);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('home');
+            
+            window.addEventListener('firebase-ready', () => {
+                carregarDadosDaNuvem();
+            });
+
+            renderizarInterfaceCompleta();
+            atualizarTimestampSyncWeb();
+        });
+
+        function solicitarSenhaTab(tabId) {
+            tabPendenteParaDesbloquear = tabId;
+            let nomeAbaFormatado = tabId === 'contas' ? 'Contas da Casa' : (tabId === 'senhas' ? 'Senhas da Casa' : (tabId === 'senhas-pessoais' ? 'Senhas Pessoais' : 'Administrador'));
+            document.getElementById('auth-tab-name').innerText = `Insira o login e senha de Administrador para aceder a "${nomeAbaFormatado}".`;
+            document.getElementById('input-login-auth').value = '';
+            document.getElementById('input-senha-auth').value = '';
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            tabPendenteParaDesbloquear = '';
+        }
+
+        function verificarLoginSenhaTab(event) {
+            event.preventDefault();
+            const loginInserido = document.getElementById('input-login-auth').value.trim();
+            const senhaInserida = document.getElementById('input-senha-auth').value.trim();
+
+            const adminEncontrado = adminsList.find(adm => adm.login === loginInserido && adm.senha === senhaInserida);
+
+            if (adminEncontrado) {
+                adminLogadoAtual = adminEncontrado;
+                const abaAlvo = tabPendenteParaDesbloquear;
+                closeAuthModal();
+                switchTab(abaAlvo);
+                renderizarInterfaceCompleta();
+            } else {
+                alert("Login ou Senha incorretos! Tente novamente.");
+                document.getElementById('input-senha-auth').value = '';
+            }
+        }
+
+        async function traduzirParaPortugues(texto) {
+            if (!texto || typeof texto !== 'string' || texto.trim() === "") return texto;
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q=${encodeURIComponent(texto)}`;
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data[0]) {
+                        let textoTraduzido = '';
+                        data[0].forEach(parte => {
+                            if (parte[0]) textoTraduzido += parte[0];
+                        });
+                        if (textoTraduzido.trim() !== '') return textoTraduzido;
+                    }
+                }
+            } catch (e) {
+                console.error("Erro na tradução:", e);
+            }
+            return texto;
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const nomeInput = document.getElementById('input-nome').value.trim();
+            const tipo = document.getElementById('input-tipo').value;
+            const btnSubmit = document.getElementById('btn-submit-media');
+            const progressContainer = document.getElementById('loading-progress-container');
+            const progressFill = document.getElementById('loading-bar-fill');
+            const progressPercent = document.getElementById('loading-percent-text');
+            const statusText = document.getElementById('loading-status-text');
+
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+            progressContainer.classList.remove('hidden');
+            progressFill.style.width = '20%';
+            progressPercent.innerText = '20%';
+            statusText.innerText = 'A ligar à API oficial...';
+
+            let dadosMidia = {
+                genero: tipo === 'Filme' ? "Filme / Ação" : (tipo === 'Anime' ? "Anime / Ação / Aventura" : "Ação / Aventura / Fantasia"),
+                resumo: `Informações detalhadas sobre ${nomeInput} obtidas do catálogo oficial.`,
+                lancamento: "2024-01-01",
+                termino: "Em andamento",
+                temporadas: 1,
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=500&auto=format&fit=crop",
+                temporadasDados: {
+                    "1": [
+                        { nome: "Episódio 1: Introdução", assistido: false, dataCheck: "" }
+                    ]
+                }
+            };
+
+            try {
+                progressFill.style.width = '50%';
+                progressPercent.innerText = '50%';
+                statusText.innerText = 'A obter episódios e resumos...';
+
+                const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
+                if (response.ok) {
+                    const show = await response.json();
+                    if (show.genres && show.genres.length > 0) {
+                        dadosMidia.genero = await traduzirParaPortugues(show.genres.join(" / "));
+                    }
+                    let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : dadosMidia.resumo;
+                    let resumoTraduzido = await traduzirParaPortugues(resumoOriginal);
+                    if (resumoTraduzido.length > 450) {
+                        resumoTraduzido = resumoTraduzido.substring(0, 447) + "...";
+                    }
+                    dadosMidia.resumo = resumoTraduzido;
+                    dadosMidia.lancamento = show.premiered || "2024-01-01";
+                    dadosMidia.termino = show.ended || "Em andamento";
+                    if (show.image && show.image.original) dadosMidia.poster = show.image.original;
+
+                    progressFill.style.width = '80%';
+                    progressPercent.innerText = '80%';
+                    statusText.innerText = 'A traduzir conteúdos para português...';
+
+                    if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                        const temporadasMap = {};
+                        for (const ep of show._embedded.episodes) {
+                            const tempNum = ep.season || 1;
+                            if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                            let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                            temporadasMap[tempNum].push({
+                                nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                                assistido: false,
+                                dataCheck: ""
+                            });
+                        }
+                        dadosMidia.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                        dadosMidia.temporadas = Object.keys(dadosMidia.temporadasDados).length || 1;
+                    }
+                }
+            } catch (e) {
+                console.error("Erro API:", e);
+            }
+
+            progressFill.style.width = '100%';
+            progressPercent.innerText = '100%';
+            statusText.innerText = 'Concluído com sucesso!';
+
+            mediaList.push({
+                id: Date.now(),
+                nome: nomeInput,
+                tipo: tipo,
+                genero: dadosMidia.genero,
+                resumo: dadosMidia.resumo,
+                lancamento: dadosMidia.lancamento,
+                termino: dadosMidia.termino,
+                temporadas: dadosMidia.temporadas,
+                poster: dadosMidia.poster,
+                temporadasDados: dadosMidia.temporadasDados,
+                avaliacao: 0
+            });
+
+            setTimeout(() => {
+                salvarNoLocalStorage();
+                closeModal();
+                progressContainer.classList.add('hidden');
+                progressFill.style.width = '0%';
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                if (tipo === 'Filme') switchSubPage('filmes');
+                else if (tipo === 'Série') switchSubPage('series');
+                else if (tipo === 'Anime') switchSubPage('animes');
+            }, 400);
+        }
+
+        async function recarregarInformacoesTitulo() {
+            const item = mediaList.find(m => m.id === currentOpenItemId);
+            if (!item) return;
+
+            const icone = document.getElementById('icone-recarregar');
+            if (icone) icone.classList.add('fa-spin');
+
+            try {
+                const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
+                if (response.ok) {
+                    const show = await response.json();
+                    if (show.genres && show.genres.length > 0) {
+                        item.genero = await traduzirParaPortugues(show.genres.join(" / "));
+                    }
+                    let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
+                    item.resumo = await traduzirParaPortugues(resumoOriginal);
+                    item.lancamento = show.premiered || item.lancamento;
+                    item.termino = show.ended || item.termino;
+                    if (show.image && show.image.original) item.poster = show.image.original;
+
+                    if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                        const temporadasMap = {};
+                        for (const ep of show._embedded.episodes) {
+                            const tempNum = ep.season || 1;
+                            if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                            let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                            temporadasMap[tempNum].push({
+                                nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                                assistido: false,
+                                dataCheck: ""
+                            });
+                        }
+                        item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                        item.temporadas = Object.keys(item.temporadasDados).length || 1;
+                    }
+                    salvarNoLocalStorage();
+                    renderizarConteudoDetalhes();
+                    alert("Informações recarregadas com sucesso!");
+                }
+            } catch (e) {
+                console.error("Erro ao recarregar:", e);
+                alert("Não foi possível atualizar as informações da API.");
+            } finally {
+                if (icone) icone.classList.remove('fa-spin');
+            }
+        }
+
+        function openModal(defaultType) {
+            const modal = document.getElementById('media-modal');
+            if (defaultType) document.getElementById('input-tipo').value = defaultType;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('media-modal').classList.add('hidden');
+            const form = document.getElementById('media-form');
+            if (form) form.reset();
+        }
+
+        function openEditItemModal() {
+            const item = mediaList.find(m => m.id === currentOpenItemId);
+            if (!item) return;
+
+            document.getElementById('edit-item-nome').value = item.nome;
+            document.getElementById('edit-item-tipo').value = item.tipo;
+            document.getElementById('edit-item-genero').value = item.genero || '';
+            document.getElementById('edit-item-lancamento').value = item.lancamento || '';
+            document.getElementById('edit-item-termino').value = item.termino || '';
+            document.getElementById('edit-item-temporadas').value = item.temporadas || 1;
+            document.getElementById('edit-item-poster').value = item.poster || '';
+            document.getElementById('manual-textarea-massa').value = '';
+
+            temporadasDadosTempEdicao = JSON.parse(JSON.stringify(item.temporadasDados || {}));
+            renderizarListaEpisodiosModal();
+
+            document.getElementById('edit-item-modal').classList.remove('hidden');
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('edit-item-modal').classList.add('hidden');
+        }
+
+        function renderizarListaEpisodiosModal() {
+            const container = document.getElementById('lista-episodios-modal');
+            if (!container) return;
+            let html = '';
+            let temEp = false;
+
+            for (let temp in temporadasDadosTempEdicao) {
+                temporadasDadosTempEdicao[temp].forEach((ep, idx) => {
+                    temEp = true;
+                    html += `
+                        <div class="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs">
+                            <span class="text-slate-200"><strong>T${temp} - E${idx+1}:</strong> ${ep.nome}</span>
+                            <button type="button" onclick="removerEpisodioManual('${temp}', ${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+            }
+
+            if (!temEp) {
+                html = `<p class="text-xs text-slate-500 italic">Nenhum episódio cadastrado ainda.</p>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function processarColagemMassa() {
+            const texto = document.getElementById('manual-textarea-massa').value;
+            if (!texto || texto.trim() === '') {
+                alert("Cole o conteúdo copiado da planilha no campo de texto primeiro.");
+                return;
+            }
+
+            const linhas = texto.split('\n');
+            let adicionados = 0;
+
+            linhas.forEach(linha => {
+                if (!linha.trim()) return;
+                const colunas = linha.split('\t').map(c => c.trim()).filter(c => c !== '');
+
+                let temp = "1";
+                let numEp = "1";
+                let nomeEp = "";
+
+                if (colunas.length >= 3) {
+                    temp = colunas[0].replace(/\D/g, '') || "1";
+                    numEp = colunas[1].replace(/\D/g, '') || "1";
+                    nomeEp = colunas.slice(2).join(" ");
+                } else if (colunas.length === 2) {
+                    numEp = colunas[0].replace(/\D/g, '') || "1";
+                    nomeEp = colunas[1];
+                } else if (colunas.length === 1) {
+                    nomeEp = colunas[0];
+                }
+
+                if (nomeEp) {
+                    if (!temporadasDadosTempEdicao[temp]) {
+                        temporadasDadosTempEdicao[temp] = [];
+                    }
+                    temporadasDadosTempEdicao[temp].push({
+                        nome: `Episódio ${numEp}: ${nomeEp}`,
+                        assistido: false,
+                        dataCheck: ""
+                    });
+                    adicionados++;
+                }
+            });
+
+            if (adicionados > 0) {
+                document.getElementById('manual-textarea-massa').value = '';
+                renderizarListaEpisodiosModal();
+                alert(`${adicionados} episódios adicionados com sucesso! Clique em "Salvar Alterações" no fim do modal para efetivar.`);
+            } else {
+                alert("Não foi possível detetar dados válidos nas linhas coladas.");
+            }
+        }
+
+        function removerEpisodioManual(temp, idx) {
+            if (temporadasDadosTempEdicao[temp]) {
+                temporadasDadosTempEdicao[temp].splice(idx, 1);
+                if (temporadasDadosTempEdicao[temp].length === 0) {
+                    delete temporadasDadosTempEdicao[temp];
+                }
+                renderizarListaEpisodiosModal();
+            }
+        }
+
+        function handleEditItemSubmit(event) {
+            event.preventDefault();
+            const item = mediaList.find(m => m.id === currentOpenItemId);
+            if (!item) return;
+
+            item.nome = document.getElementById('edit-item-nome').value.trim();
+            item.tipo = document.getElementById('edit-item-tipo').value;
+            item.genero = document.getElementById('edit-item-genero').value.trim();
+            item.lancamento = document.getElementById('edit-item-lancamento').value;
+            item.termino = document.getElementById('edit-item-termino').value.trim();
+            item.temporadas = parseInt(document.getElementById('edit-item-temporadas').value) || 1;
+            item.poster = document.getElementById('edit-item-poster').value.trim();
+            item.temporadasDados = temporadasDadosTempEdicao;
+
+            salvarNoLocalStorage();
+            closeEditItemModal();
+            
+            document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+            document.getElementById('detalhe-categoria-tag').innerText = item.tipo;
+            renderizarConteudoDetalhes();
+        }
+
+        function renderMediaList(category) {
+            let containerId = '', tipoFiltro = '', accentColor = '', iconClass = '';
+            if (category === 'filmes') { containerId = 'grid-filmes'; tipoFiltro = 'Filme'; accentColor = 'cyan'; iconClass = 'fa-film'; }
+            else if (category === 'series') { containerId = 'grid-series'; tipoFiltro = 'Série'; accentColor = 'indigo'; iconClass = 'fa-tv'; }
+            else if (category === 'animes') { containerId = 'grid-animes'; tipoFiltro = 'Anime'; accentColor = 'pink'; iconClass = 'fa-video'; }
+
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const filteredItems = mediaList.filter(item => item.tipo === tipoFiltro);
+
+            if (filteredItems.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                        <i class="fa-solid ${iconClass} text-4xl text-${accentColor}-400 mb-3"></i>
+                        <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} adicionado ainda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredItems.forEach(item => {
+                let allDone = true;
+                for (let t in item.temporadasDados) {
+                    item.temporadasDados[t].forEach(ep => { if (!ep.assistido) allDone = false; });
+                }
+                let statusText = allDone ? "Concluído" : "Não Concluído";
+                let badgeStyle = allDone ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                const totalTemps = Object.keys(item.temporadasDados || {}).length;
+
+                html += `
+                    <div onclick="openDetails(${item.id})" class="group cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-${accentColor}-500/50 rounded-2xl overflow-hidden transition-all shadow-xl flex flex-col justify-between hover:-translate-y-1">
+                        <div class="h-64 w-full overflow-hidden relative bg-slate-950 flex items-center justify-center">
+                            <img src="${item.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop'}" alt="${item.nome}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute top-3 right-3">
+                                <span class="text-xs px-2.5 py-1 rounded-md border font-semibold backdrop-blur-md bg-slate-950/80 ${badgeStyle}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-1 group-hover:text-${accentColor}-400 transition">${item.nome}</h3>
+                                <p class="text-xs text-${accentColor}-400 font-medium mb-3">${item.genero || 'Gênero não informado'}</p>
+                                <div class="space-y-1.5 text-xs text-slate-300 border-t border-slate-800/80 pt-3">
+                                    <p><strong>Lançamento:</strong> ${item.lancamento ? item.lancamento.split('-').reverse().join('/') : '-'}</p>
+                                    <p><strong>Término:</strong> ${item.termino || '-'}</p>
+                                    <p><strong>Temporadas:</strong> ${totalTemps} Temp.</p>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs">
+                                <span class="text-amber-400 font-medium">${'⭐'.repeat(item.avaliacao || 0)}</span>
+                                <span onclick="event.stopPropagation(); deleteItem(${item.id}, '${category}')" class="text-rose-400 hover:text-rose-300 transition font-medium"><i class="fa-solid fa-trash mr-1"></i> Apagar</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openDetails(id) {
+            const item = mediaList.find(m => m.id === id);
+            if (!item) return;
+
+            currentOpenItemId = id;
+            const tempsDisponiveis = Object.keys(item.temporadasDados || {});
+            currentSelectedTemp = tempsDisponiveis.length > 0 ? tempsDisponiveis[0] : 1;
+
+            ['filmes', 'series', 'animes'].forEach(s => {
+                const el = document.getElementById('subpage-' + s);
+                if (el) el.classList.add('hidden');
+            });
+
+            document.getElementById('subpage-detalhes').classList.remove('hidden');
+            document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+            document.getElementById('detalhe-categoria-tag').innerText = item.tipo;
+            document.getElementById('btn-voltar-detalhes').setAttribute('onclick', `switchSubPage('${currentActiveCategory}')`);
+
+            renderizarConteudoDetalhes();
+        }
+
+        function renderizarConteudoDetalhes() {
+            const item = mediaList.find(m => m.id === currentOpenItemId);
+            if (!item) return;
+
+            let accentColor = item.tipo === 'Filme' ? 'cyan' : (item.tipo === 'Série' ? 'indigo' : 'pink');
+            let allDone = true;
+            for (let t in item.temporadasDados) {
+                item.temporadasDados[t].forEach(ep => { if (!ep.assistido) allDone = false; });
+            }
+
+            const badgeStatus = document.getElementById('detalhe-status-badge');
+            if (allDone) {
+                badgeStatus.innerText = "Concluído";
+                badgeStatus.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+            } else {
+                badgeStatus.innerText = "Não Concluído";
+                badgeStatus.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+            }
+
+            let optionsTemp = '';
+            const temporadasChaves = Object.keys(item.temporadasDados || {}).sort((a, b) => Number(a) - Number(b));
+            temporadasChaves.forEach(t => {
+                optionsTemp += `<option value="${t}" ${currentSelectedTemp == t ? 'selected' : ''}>Temporada ${t}</option>`;
+            });
+
+            let epsHtml = '';
+            let listaEps = item.temporadasDados[currentSelectedTemp] || [];
+            listaEps.forEach((ep, idx) => {
+                epsHtml += `
+                    <div class="flex items-center justify-between bg-slate-950 px-4 py-3 rounded-xl border border-slate-800 text-sm">
+                        <div class="space-y-1">
+                            <span class="text-slate-200 block">${ep.nome}</span>
+                            <span class="text-[10px] text-slate-500 block">${ep.assistido && ep.dataCheck ? 'Check em: ' + ep.dataCheck : ''}</span>
+                        </div>
+                        <label class="flex items-center space-x-2 cursor-pointer select-none">
+                            <span class="text-xs font-semibold ${ep.assistido ? 'text-emerald-400' : 'text-slate-400'}">${ep.assistido ? 'Assistido' : 'Não Assistido'}</span>
+                            <input type="checkbox" ${ep.assistido ? 'checked' : ''} onchange="toggleEpisodio(${item.id}, '${currentSelectedTemp}', ${idx})" class="w-4 h-4 rounded accent-blue-600 cursor-pointer">
+                        </label>
+                    </div>
+                `;
+            });
+
+            document.getElementById('detalhe-conteudo').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+                    <div class="md:col-span-1 overflow-hidden rounded-2xl shadow-2xl bg-slate-950 flex items-center justify-center">
+                        <img src="${item.poster}" alt="${item.nome}" class="w-full h-auto object-cover rounded-2xl max-h-[450px]">
+                    </div>
+                    <div class="md:col-span-3 space-y-6">
+                        <div>
+                            <span class="text-xs uppercase tracking-widest text-${accentColor}-400 font-bold">${item.genero}</span>
+                            <h3 class="text-3xl font-extrabold text-white mt-1">${item.nome}</h3>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Resumo</h4>
+                            <p class="text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">${item.resumo}</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Episódios & Progresso</h4>
+                                <select onchange="mudarTemporada(this.value)" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer">
+                                    ${optionsTemp}
+                                </select>
+                            </div>
+                            <div class="space-y-2 max-h-60 overflow-y-auto pr-2">${epsHtml}</div>
+                        </div>
+
+                        <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Minha Avaliação ⭐</h4>
+                                <p class="text-xs text-slate-500">Selecione de 1 a 5 estrelas</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <select id="select-avaliacao-${item.id}" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="5" ${item.avaliacao === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ (5/5)</option>
+                                    <option value="4" ${item.avaliacao === 4 ? 'selected' : ''}>⭐⭐⭐⭐ (4/5)</option>
+                                    <option value="3" ${item.avaliacao === 3 ? 'selected' : ''}>⭐⭐⭐ (3/5)</option>
+                                    <option value="2" ${item.avaliacao === 2 ? 'selected' : ''}>⭐⭐ (2/5)</option>
+                                    <option value="1" ${item.avaliacao === 1 ? 'selected' : ''}>⭐ (1/5)</option>
+                                </select>
+                                <button onclick="salvarAvaliacao(${item.id})" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function mudarTemporada(tempNum) {
+            currentSelectedTemp = tempNum;
+            renderizarConteudoDetalhes();
+        }
+
+        function toggleEpisodio(itemId, tempNum, epIndex) {
+            const item = mediaList.find(m => m.id === itemId);
+            if (item && item.temporadasDados[tempNum] && item.temporadasDados[tempNum][epIndex]) {
+                const ep = item.temporadasDados[tempNum][epIndex];
+                ep.assistido = !ep.assistido;
+                ep.dataCheck = ep.assistido ? new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : "";
+                salvarNoLocalStorage();
+                renderizarConteudoDetalhes();
+            }
+        }
+
+        function salvarAvaliacao(id) {
+            const select = document.getElementById(`select-avaliacao-${id}`);
+            const novaNota = parseInt(select.value);
+            const item = mediaList.find(m => m.id === id);
+            if (item) {
+                item.avaliacao = novaNota;
+                salvarNoLocalStorage();
+                alert("Avaliação salva com sucesso!");
+            }
+        }
+
+        function deleteItem(id, category) {
+            mediaList = mediaList.filter(item => item.id !== id);
+            salvarNoLocalStorage();
+            switchSubPage(category);
+        }
+
+        function renderContasCasa() {
+            const container = document.getElementById('grid-contas-casa');
+            const btnAddContas = document.getElementById('btn-add-contas');
+            if (!container) return;
+
+            const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+            if (btnAddContas) {
+                if (isVipLogado) btnAddContas.classList.remove('hidden');
+                else btnAddContas.classList.add('hidden');
+            }
+
+            // Agrupar acessos por nome da propriedade / casa
+            const gruposPorCasa = {};
+            acessosList.forEach(acc => {
+                const nomeCasa = acc.nome || "Outra Propriedade";
+                if (!gruposPorCasa[nomeCasa]) {
+                    gruposPorCasa[nomeCasa] = {
+                        morada: acc.morada || '',
+                        contas: []
+                    };
+                }
+                if (acc.morada && !gruposPorCasa[nomeCasa].morada) {
+                    gruposPorCasa[nomeCasa].morada = acc.morada;
+                }
+                gruposPorCasa[nomeCasa].contas.push(acc);
+            });
+
+            let html = '';
+            for (let nomeCasa in gruposPorCasa) {
+                const grupo = gruposPorCasa[nomeCasa];
+                let subContasHtml = '';
+
+                grupo.contas.forEach(acc => {
+                    let nomeSiteFormatado = acc.nomeSite || "Portal Oficial";
+                    if (acc.portal) {
+                        if (acc.portal.includes("coopera")) nomeSiteFormatado = "Portal Coopera";
+                        else if (acc.portal.includes("cooperalianca")) nomeSiteFormatado = "Portal Cooperaliança";
+                        else if (acc.portal.includes("casan")) nomeSiteFormatado = "Casan";
+                        else if (acc.portal.includes("samaerincao")) nomeSiteFormatado = "Samae Rincão";
+                    }
+
+                    let camposDinamicosHtml = '';
+                    if (acc.portal) {
+                        camposDinamicosHtml += `<div class="col-span-full mb-1"><a href="${acc.portal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${acc.tipoConta || 'Serviço'} - ${nomeSiteFormatado}</a></div>`;
+                    }
+                    if (acc.login) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login / UC / Email: <strong class="text-white">${acc.login}</strong></span><button onclick="copiarTexto('${acc.login}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.cpf) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.cpf}</strong></span><button onclick="copiarTexto('${acc.cpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.matricula) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.matricula}</strong></span><button onclick="copiarTexto('${acc.matricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.senha) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.senha}</strong></span><button onclick="copiarTexto('${acc.senha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+                    let botoesAcaoItem = isVipLogado ? `
+                        <div class="flex items-center space-x-1">
+                            <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    ` : '';
+
+                    subContasHtml += `
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> TIPO DE CONTA: ${acc.tipoConta || 'ENERGIA / LUZ'}</span>
+                                ${botoesAcaoItem}
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${camposDinamicosHtml}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                        <div class="border-b border-slate-800 pb-3">
+                            <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${nomeCasa}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> Morada / Localização: <span class="text-slate-200">${grupo.morada || 'Não informada'}</span></p>
+                        </div>
+                        <div class="space-y-4">
+                            ${subContasHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderAcessos() {
+            const container = document.getElementById('grid-acessos');
+            const btnAddSenhas = document.getElementById('btn-add-senhas');
+            if (!container) return;
+
+            const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+            if (btnAddSenhas) {
+                if (isVipLogado) btnAddSenhas.classList.remove('hidden');
+                else btnAddSenhas.classList.add('hidden');
+            }
+
+            // Agrupar acessos por nome da propriedade / casa
+            const gruposPorCasa = {};
+            acessosList.forEach(acc => {
+                const nomeCasa = acc.nome || "Outra Propriedade";
+                if (!gruposPorCasa[nomeCasa]) {
+                    gruposPorCasa[nomeCasa] = {
+                        morada: acc.morada || '',
+                        contas: []
+                    };
+                }
+                if (acc.morada && !gruposPorCasa[nomeCasa].morada) {
+                    gruposPorCasa[nomeCasa].morada = acc.morada;
+                }
+                gruposPorCasa[nomeCasa].contas.push(acc);
+            });
+
+            let html = '';
+            for (let nomeCasa in gruposPorCasa) {
+                const grupo = gruposPorCasa[nomeCasa];
+                let subContasHtml = '';
+
+                grupo.contas.forEach(acc => {
+                    let nomeSiteFormatado = acc.nomeSite || "Portal Oficial";
+                    if (acc.portal) {
+                        if (acc.portal.includes("coopera")) nomeSiteFormatado = "Portal Coopera";
+                        else if (acc.portal.includes("cooperalianca")) nomeSiteFormatado = "Portal Cooperaliança";
+                        else if (acc.portal.includes("casan")) nomeSiteFormatado = "Casan";
+                        else if (acc.portal.includes("samaerincao")) nomeSiteFormatado = "Samae Rincão";
+                    }
+
+                    let camposDinamicosHtml = '';
+                    if (acc.portal) {
+                        camposDinamicosHtml += `<div class="col-span-full mb-1"><a href="${acc.portal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${acc.tipoConta || 'Serviço'} - ${nomeSiteFormatado}</a></div>`;
+                    }
+                    if (acc.login) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login / UC / Email: <strong class="text-white">${acc.login}</strong></span><button onclick="copiarTexto('${acc.login}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.cpf) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.cpf}</strong></span><button onclick="copiarTexto('${acc.cpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.matricula) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.matricula}</strong></span><button onclick="copiarTexto('${acc.matricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+                    if (acc.senha) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.senha}</strong></span><button onclick="copiarTexto('${acc.senha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+                    let botoesAcaoItem = isVipLogado ? `
+                        <div class="flex items-center space-x-1">
+                            <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    ` : '';
+
+                    subContasHtml += `
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-shield-halved mr-1"></i> TIPO DE CONTA: ${acc.tipoConta || 'SENHA'}</span>
+                                ${botoesAcaoItem}
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${camposDinamicosHtml}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                        <div class="border-b border-slate-800 pb-3">
+                            <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${nomeCasa}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> Morada / Localização: <span class="text-slate-200">${grupo.morada || 'Não informada'}</span></p>
+                        </div>
+                        <div class="space-y-4">
+                            ${subContasHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderSenhasPessoais() {
+            const container = document.getElementById('grid-senhas-pessoais');
+            if (!container) return;
+
+            if (!adminLogadoAtual) {
+                container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Faça login com a sua conta para ver as suas senhas pessoais.</p></div>`;
+                return;
+            }
+
+            const minhasSenhas = senhasPessoaisList.filter(item => item.userLogin === adminLogadoAtual.login);
+            if (minhasSenhas.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Nenhuma credencial pessoal encontrada.</p></div>`;
+                return;
+            }
+
+            let html = '';
+            minhasSenhas.forEach(item => {
+                let linkHtml = item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center mt-1"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${item.url}</a>` : '';
+                html += `
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                        <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-key text-purple-400 mr-2"></i> ${item.servico}</h3>
+                                ${linkHtml}
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="openEditPersonalPassModal(${item.id})" class="text-amber-400 p-2 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="deletePersonalPass(${item.id})" class="text-rose-400 p-2 text-xs"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                            <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login: <strong class="text-white">${item.login}</strong></span><button onclick="copiarTexto('${item.login}')" class="text-slate-400 hover:text-purple-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>
+                            <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${item.senha}</strong></span><button onclick="copiarTexto('${item.senha}')" class="text-slate-400 hover:text-purple-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openPersonalPassModal() {
+            if (!adminLogadoAtual) {
+                alert("Efetue login primeiro.");
+                solicitarSenhaTab('senhas-pessoais');
+                return;
+            }
+            document.getElementById('personal-id').value = '';
+            document.getElementById('personal-pass-form').reset();
+            document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal';
+            document.getElementById('personal-pass-modal').classList.remove('hidden');
+        }
+
+        function closePersonalPassModal() {
+            document.getElementById('personal-pass-modal').classList.add('hidden');
+        }
+
+        function handlePersonalPassSubmit(event) {
+            event.preventDefault();
+            if (!adminLogadoAtual) return;
+
+            const idInput = document.getElementById('personal-id').value;
+            const servico = document.getElementById('pers-servico').value.trim();
+            const url = document.getElementById('pers-url').value.trim();
+            const login = document.getElementById('pers-login').value.trim();
+            const senha = document.getElementById('pers-senha').value.trim();
+
+            if (idInput) {
+                const item = senhasPessoaisList.find(p => p.id == idInput);
+                if (item && item.userLogin === adminLogadoAtual.login) {
+                    item.servico = servico;
+                    item.url = url;
+                    item.login = login;
+                    item.senha = senha;
+                }
+            } else {
+                senhasPessoaisList.push({
+                    id: Date.now(),
+                    userLogin: adminLogadoAtual.login,
+                    servico,
+                    url,
+                    login,
+                    senha
+                });
+            }
+
+            salvarNoLocalStorage();
+            closePersonalPassModal();
+            renderSenhasPessoais();
+        }
+
+        function openEditPersonalPassModal(id) {
+            const item = senhasPessoaisList.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById('personal-id').value = item.id;
+            document.getElementById('pers-servico').value = item.servico;
+            document.getElementById('pers-url').value = item.url || '';
+            document.getElementById('pers-login').value = item.login;
+            document.getElementById('pers-senha').value = item.senha;
+            document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Credencial Pessoal';
+            document.getElementById('personal-pass-modal').classList.remove('hidden');
+        }
+
+        function deletePersonalPass(id) {
+            if (confirm("Deseja realmente remover esta credencial?")) {
+                senhasPessoaisList = senhasPessoaisList.filter(p => p.id !== id);
+                salvarNoLocalStorage();
+                renderSenhasPessoais();
+            }
+        }
+
+        function renderAdmins() {
+            const container = document.getElementById('lista-admins');
+            const btnAddAdmin = document.getElementById('btn-add-admin-container');
+            if (!container) return;
+
+            const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+            if (btnAddAdmin) {
+                if (isVipLogado) btnAddAdmin.classList.remove('hidden');
+                else btnAddAdmin.classList.add('hidden');
+            }
+
+            let html = '';
+            adminsList.forEach(adm => {
+                let badgeVip = adm.vip ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md ml-2 uppercase">VIP</span>` : `<span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-md ml-2 uppercase">Normal</span>`;
+                let botoesAcao = isVipLogado ? `
+                    <div class="flex items-center space-x-1">
+                        <button onclick="openEditAdminModal(${adm.id})" class="text-amber-400 p-2 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteAdmin(${adm.id})" class="text-rose-400 p-2 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                ` : '';
+
+                html += `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-bold text-white flex items-center"><i class="fa-solid fa-user-shield text-blue-400 mr-2 text-xs"></i> ${adm.nome} ${badgeVip}</h4>
+                            <p class="text-xs text-slate-400">Login: <span class="text-slate-200">${adm.login}</span></p>
+                        </div>
+                        ${botoesAcao}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openAdminModal() {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) {
+                alert("Acesso negado! Apenas administradores VIP.");
+                return;
+            }
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-form').reset();
+        }
+
+        function handleAdminSubmit(event) {
+            event.preventDefault();
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+            adminsList.push({
+                id: Date.now(),
+                nome: document.getElementById('adm-nome').value,
+                login: document.getElementById('adm-login').value,
+                senha: document.getElementById('adm-senha').value,
+                vip: document.getElementById('adm-vip').checked
+            });
+            salvarNoLocalStorage();
+            closeAdminModal();
+            renderAdmins();
+        }
+
+        function openEditAdminModal(id) {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+            const adm = adminsList.find(a => a.id === id);
+            if (!adm) return;
+
+            document.getElementById('edit-adm-id').value = adm.id;
+            document.getElementById('edit-adm-nome').value = adm.nome;
+            document.getElementById('edit-adm-login').value = adm.login;
+            document.getElementById('edit-adm-senha').value = adm.senha;
+            document.getElementById('edit-adm-vip').checked = adm.vip;
+            document.getElementById('edit-admin-modal').classList.remove('hidden');
+        }
+
+        function closeEditAdminModal() {
+            document.getElementById('edit-admin-modal').classList.add('hidden');
+        }
+
+        function handleEditAdminSubmit(event) {
+            event.preventDefault();
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+            const id = parseInt(document.getElementById('edit-adm-id').value);
+            const adm = adminsList.find(a => a.id === id);
+            if (!adm) return;
+
+            adm.nome = document.getElementById('edit-adm-nome').value;
+            adm.login = document.getElementById('edit-adm-login').value;
+            adm.senha = document.getElementById('edit-adm-senha').value;
+            adm.vip = document.getElementById('edit-adm-vip').checked;
+
+            if (adminLogadoAtual.id === adm.id) {
+                adminLogadoAtual = adm;
+            }
+
+            salvarNoLocalStorage();
+            closeEditAdminModal();
+            renderAdmins();
+        }
+
+        function deleteAdmin(id) {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+            if (confirm("Deseja realmente remover este administrador?")) {
+                adminsList = adminsList.filter(a => a.id !== id);
+                salvarNoLocalStorage();
+                renderAdmins();
+            }
+        }
+
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("Copiado para a área de transferência: " + texto);
+            });
+        }
+
+        function openAccessModal() {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) {
+                alert("Acesso negado! Apenas administradores VIP.");
+                return;
+            }
+            
+            // Limpar todos os campos do formulário para virem em branco
+            const formAcesso = document.getElementById('access-form');
+            if (formAcesso) formAcesso.reset();
+
+            const selectTipo = document.getElementById('acc-tipo');
+            if (selectTipo) selectTipo.value = "Energia / Luz";
+
+            const containerNovo = document.getElementById('container-novo-tipo');
+            if (containerNovo) containerNovo.classList.add('hidden');
+
+            const inputNovoTipo = document.getElementById('acc-novo-tipo-input');
+            if (inputNovoTipo) inputNovoTipo.value = '';
+
+            document.getElementById('access-modal').classList.remove('hidden');
+        }
+
+        function verificarNovoTipoConta(valor) {
+            const containerNovo = document.getElementById('container-novo-tipo');
+            const inputNovoTipo = document.getElementById('acc-novo-tipo-input');
+            if (valor === 'novo') {
+                if (containerNovo) containerNovo.classList.remove('hidden');
+                if (inputNovoTipo) inputNovoTipo.focus();
+            } else {
+                if (containerNovo) containerNovo.classList.add('hidden');
+                if (inputNovoTipo) inputNovoTipo.value = '';
+            }
+        }
+
+        function verificarNovoTipoEdicao(valor) {
+            const containerNovo = document.getElementById('container-novo-tipo-edit');
+            const inputNovoTipo = document.getElementById('edit-acc-novo-tipo-input');
+            if (valor === 'novo') {
+                if (containerNovo) containerNovo.classList.remove('hidden');
+                if (inputNovoTipo) inputNovoTipo.focus();
+            } else {
+                if (containerNovo) containerNovo.classList.add('hidden');
+                if (inputNovoTipo) inputNovoTipo.value = '';
+            }
+        }
+
+        function closeAccessModal() {
+            document.getElementById('access-modal').classList.add('hidden');
+        }
+
+        function handleAccessSubmit(event) {
+            event.preventDefault();
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+            let tipoContaFinal = document.getElementById('acc-tipo').value;
+            if (tipoContaFinal === 'novo') {
+                const novoTipoVal = document.getElementById('acc-novo-tipo-input').value.trim();
+                if (novoTipoVal) {
+                    tipoContaFinal = novoTipoVal;
+                } else {
+                    tipoContaFinal = "Outros";
+                }
+            }
+
+            acessosList.push({
+                id: Date.now(),
+                nome: document.getElementById('acc-nome').value,
+                morada: document.getElementById('acc-morada').value,
+                tipoConta: tipoContaFinal,
+                nomeSite: document.getElementById('acc-nome-site').value,
+                portal: document.getElementById('acc-portal').value,
+                login: document.getElementById('acc-login').value,
+                cpf: document.getElementById('acc-cpf').value,
+                matricula: document.getElementById('acc-matricula').value,
+                senha: document.getElementById('acc-senha').value
+            });
+
+            salvarNoLocalStorage();
+            closeAccessModal();
+            renderAcessos();
+            renderContasCasa();
+        }
+
+        function openEditAccessModal(id) {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+            const acc = acessosList.find(a => a.id === id);
+            if (!acc) return;
+
+            document.getElementById('edit-acc-id').value = acc.id;
+            document.getElementById('edit-acc-nome').value = acc.nome;
+            document.getElementById('edit-acc-morada').value = acc.morada || '';
+            
+            const selectTipo = document.getElementById('edit-acc-tipo');
+            const containerNovo = document.getElementById('container-novo-tipo-edit');
+            const inputNovoTipo = document.getElementById('edit-acc-novo-tipo-input');
+
+            if (selectTipo) {
+                let existeOpcao = false;
+                for (let opt of selectTipo.options) {
+                    if (opt.value === acc.tipoConta) {
+                        existeOpcao = true;
+                        break;
+                    }
+                }
+                if (existeOpcao) {
+                    selectTipo.value = acc.tipoConta || 'Energia / Luz';
+                    if (containerNovo) containerNovo.classList.add('hidden');
+                    if (inputNovoTipo) inputNovoTipo.value = '';
+                } else if (acc.tipoConta) {
+                    selectTipo.value = 'novo';
+                    if (containerNovo) containerNovo.classList.remove('hidden');
+                    if (inputNovoTipo) inputNovoTipo.value = acc.tipoConta;
+                } else {
+                    selectTipo.value = 'Energia / Luz';
+                    if (containerNovo) containerNovo.classList.add('hidden');
+                }
+            }
+
+            document.getElementById('edit-acc-nome-site').value = acc.nomeSite || '';
+            document.getElementById('edit-acc-portal').value = acc.portal || '';
+            document.getElementById('edit-acc-login').value = acc.login || '';
+            document.getElementById('edit-acc-cpf').value = acc.cpf || '';
+            document.getElementById('edit-acc-matricula').value = acc.matricula || '';
+            document.getElementById('edit-acc-senha').value = acc.senha || '';
+
+            document.getElementById('edit-access-modal').classList.remove('hidden');
+        }
+
+        function closeEditAccessModal() {
+            document.getElementById('edit-access-modal').classList.add('hidden');
+        }
+
+        function handleEditAccessSubmit(event) {
+            event.preventDefault();
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+            const id = parseInt(document.getElementById('edit-acc-id').value);
+            const acc = acessosList.find(a => a.id === id);
+            if (!acc) return;
+
+            let tipoContaFinal = document.getElementById('edit-acc-tipo').value;
+            if (tipoContaFinal === 'novo') {
+                const novoTipoVal = document.getElementById('edit-acc-novo-tipo-input').value.trim();
+                if (novoTipoVal) {
+                    tipoContaFinal = novoTipoVal;
+                } else {
+                    tipoContaFinal = "Outros";
+                }
+            }
+
+            acc.nome = document.getElementById('edit-acc-nome').value;
+            acc.morada = document.getElementById('edit-acc-morada').value;
+            acc.tipoConta = tipoContaFinal;
+            acc.nomeSite = document.getElementById('edit-acc-nome-site').value;
+            acc.portal = document.getElementById('edit-acc-portal').value;
+            acc.login = document.getElementById('edit-acc-login').value;
+            acc.cpf = document.getElementById('edit-acc-cpf').value;
+            acc.matricula = document.getElementById('edit-acc-matricula').value;
+            acc.senha = document.getElementById('edit-acc-senha').value;
+
+            salvarNoLocalStorage();
+            closeEditAccessModal();
+            renderAcessos();
+            renderContasCasa();
+        }
+
+        function deleteAccess(id) {
+            if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+            if (confirm("Deseja realmente excluir este registo?")) {
+                acessosList = acessosList.filter(a => a.id !== id);
+                salvarNoLocalStorage();
+                renderAcessos();
+                renderContasCasa();
+            }
+        }
+
+        function switchTab(tabId) {
+            ['home', 'automacao', 'tv', 'contas', 'senhas', 'senhas-pessoais', 'administrador'].forEach(t => {
+                const element = document.getElementById('tab-' + t);
+                const btn = document.getElementById('btn-' + t);
+                if (element) element.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('active', 'text-white');
+                    btn.classList.add('bg-slate-900/60', 'text-slate-400');
+                }
+            });
+
+            ['filmes', 'series', 'animes', 'detalhes'].forEach(sub => {
+                const subEl = document.getElementById('subpage-' + sub);
+                if (subEl) subEl.classList.add('hidden');
+            });
+
+            const targetTab = document.getElementById('tab-' + tabId);
+            const targetBtn = document.getElementById('btn-' + tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            if (targetBtn) {
+                targetBtn.classList.add('active', 'text-white');
+                targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
+            }
+
+            if (tabId === 'senhas') renderAcessos();
+            if (tabId === 'contas') renderContasCasa();
+            if (tabId === 'senhas-pessoais') renderSenhasPessoais();
+            if (tabId === 'administrador') renderAdmins();
+        }
+
+        function switchSubPage(page) {
+            const tabTv = document.getElementById('tab-tv');
+            ['filmes', 'series', 'animes', 'detalhes'].forEach(s => {
+                const el = document.getElementById('subpage-' + s);
+                if (el) el.classList.add('hidden');
+            });
+
+            if (page === 'main') {
+                if (tabTv) tabTv.classList.remove('hidden');
+            } else {
+                if (tabTv) tabTv.classList.add('hidden');
+                currentActiveCategory = page;
+                const targetSub = document.getElementById('subpage-' + page);
+                if (targetSub) {
+                    targetSub.classList.remove('hidden');
+                    renderMediaList(page);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
