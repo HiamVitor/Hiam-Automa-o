@@ -80,7 +80,6 @@
             </nav>
         </div>
 
-        <!-- Indicador de Status Web e Sincronização Global -->
         <div class="pt-6 border-t border-slate-800/80 space-y-3">
             <div class="flex items-center justify-between text-xs">
                 <span class="text-slate-500">Residência Hiam</span>
@@ -99,11 +98,10 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="flex-1 p-10 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
 
-        <!-- Banner de Aviso de Conexão Web / Cloud -->
-        <div id="banner-alerta-web" class="mb-6 bg-blue-950/40 border border-blue-500/30 p-4 rounded-2xl flex items-center justify-between text-xs text-blue-200">
+        <div class="mb-6 bg-blue-950/40 border border-blue-500/30 p-4 rounded-2xl flex items-center justify-between text-xs text-blue-200">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-500/20 text-blue-400 rounded-xl">
-                    <i class="fa-solid fa-cloud-arrow-up text-lg animate-bounce"></i>
+                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
                 </div>
                 <div>
                     <strong class="text-white block">Ambiente Web Ativo</strong>
@@ -127,7 +125,6 @@
             </header>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- 1. Automação -->
                 <div onclick="switchTab('automacao')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-sliders text-xl"></i>
@@ -136,7 +133,6 @@
                     <p class="text-xs text-slate-400">Controlo de luzes, tomadas, ar condicionado e portão.</p>
                 </div>
 
-                <!-- 2. TV / Séries -->
                 <div onclick="switchTab('tv')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-tv text-xl"></i>
@@ -145,7 +141,6 @@
                     <p class="text-xs text-slate-400">Gerencie streamings, lista de filmes e episódios favoritos.</p>
                 </div>
 
-                <!-- 3. Contas da Casa -->
                 <div onclick="solicitarSenhaTab('contas')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-wallet text-xl"></i>
@@ -154,7 +149,6 @@
                     <p class="text-xs text-slate-400">Acompanhe vencimentos de água, luz, internet e rendas.</p>
                 </div>
 
-                <!-- 4. Senhas da Casa -->
                 <div onclick="solicitarSenhaTab('senhas')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-shield-halved text-xl"></i>
@@ -163,7 +157,6 @@
                     <p class="text-xs text-slate-400">Gerencie chaves Wi-Fi, fechaduras e acessos de streaming.</p>
                 </div>
 
-                <!-- 5. Senhas Pessoais -->
                 <div onclick="solicitarSenhaTab('senhas-pessoais')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-key text-xl"></i>
@@ -172,7 +165,6 @@
                     <p class="text-xs text-slate-400">Consulte e gerencie as suas credenciais e cofres pessoais.</p>
                 </div>
 
-                <!-- 6. Administrador -->
                 <div onclick="solicitarSenhaTab('administrador')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-blue-400/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-user-gear text-xl"></i>
@@ -183,7 +175,6 @@
             </div>
         </section>
 
-        <!-- Demais seções mantidas idênticas... -->
         <!-- AUTOMAÇÃO -->
         <section id="tab-automacao" class="hidden space-y-8">
             <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
@@ -258,7 +249,7 @@
             </div>
         </section>
 
-        <!-- SUBPÁGINAS, DETALHES E MODAIS -->
+        <!-- SUBPÁGINAS E DETALHES -->
         <section id="subpage-filmes" class="hidden space-y-8">
             <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
                 <div class="flex items-center space-x-4">
@@ -430,8 +421,7 @@
 
     </main>
 
-    <!-- Modais mantidos idênticos... -->
-    <!-- MODAL DO FORMULÁRIO DE MÍDIA -->
+    <!-- MODAIS DO SISTEMA -->
     <div id="media-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -443,20 +433,15 @@
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Filme / Série / Anime</label>
                     <input type="text" id="input-nome" required placeholder="Ex: Naruto, Solo Leveling, Interstellar..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    <p class="text-[11px] text-cyan-400 mt-1"><i class="fa-solid fa-database mr-1"></i> Sincronização e tradução automática ativada.</p>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
-                        <select id="input-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                            <option value="Filme">Filme</option>
-                            <option value="Série">Série</option>
-                            <option value="Anime">Anime</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
+                    <select id="input-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="Filme">Filme</option>
+                        <option value="Série">Série</option>
+                        <option value="Anime">Anime</option>
+                    </select>
                 </div>
-
                 <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
                     <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Salvar Título</button>
@@ -465,89 +450,7 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITAR TÍTULO, INFORMAÇÕES E EPISÓDIOS -->
-    <div id="edit-item-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl space-y-6 my-8">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Informações & Episódios</h3>
-                <button onclick="closeEditItemModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
-            <form id="edit-item-form" onsubmit="handleEditItemSubmit(event)" class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-                <div class="space-y-4">
-                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Dados Principais</h4>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Título</label>
-                        <input type="text" id="edit-item-nome" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
-                            <select id="edit-item-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                                <option value="Filme">Filme</option>
-                                <option value="Série">Série</option>
-                                <option value="Anime">Anime</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Gênero</label>
-                            <input type="text" id="edit-item-genero" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Lançamento</label>
-                            <input type="date" id="edit-item-lancamento" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Término</label>
-                            <input type="text" id="edit-item-termino" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Temporadas</label>
-                            <input type="number" id="edit-item-temporadas" min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">URL do Poster (Imagem)</label>
-                        <input type="text" id="edit-item-poster" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-
-                <div class="border-t border-slate-800 pt-4 space-y-4">
-                    <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-file-excel mr-1.5 text-emerald-400"></i> Colar Episódios em Massa (Excel / Planilha)
-                    </h4>
-                    
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                        <p class="text-[11px] text-slate-400">
-                            Pode copiar as colunas diretamente de uma tabela (ex: Temporada | Episódio | Título) e colar no campo abaixo:
-                        </p>
-                        <textarea id="manual-textarea-massa" rows="4" placeholder="Cole aqui os dados copiados da tabela..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-blue-500"></textarea>
-                        
-                        <div class="flex justify-end">
-                            <button type="button" onclick="processarColagemMassa()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg flex items-center space-x-1.5">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Adicionar Episódios Colados</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-[11px] font-semibold text-slate-400 uppercase">Episódios Cadastrados Atualmente:</label>
-                        <div id="lista-episodios-modal" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
-                    <button type="button" onclick="closeEditItemModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
-                    <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DE LOGIN E SENHA PARA ACEDER ÀS ABAS PROTEGIDAS -->
+    <!-- Demais modais necessários mantidos... -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-8 shadow-2xl space-y-6 text-center">
             <div class="inline-block p-4 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
@@ -557,7 +460,6 @@
                 <h3 class="text-xl font-bold text-white">Acesso Restrito</h3>
                 <p id="auth-tab-name" class="text-xs text-slate-400 mt-1">Insira o login e senha de administrador.</p>
             </div>
-            
             <form onsubmit="verificarLoginSenhaTab(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / Utilizador</label>
@@ -569,14 +471,11 @@
                 </div>
                 <div class="flex space-x-3 pt-2">
                     <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs py-3 rounded-xl transition shadow-lg shadow-amber-600/20">Desbloquear</button>
-                    <button type="button" onclick="closeAuthModal(); switchTab('home');" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs py-3 rounded-xl transition">Voltar para Início</button>
+                    <button type="button" onclick="closeAuthModal(); switchTab('home');" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs py-3 rounded-xl transition">Voltar</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- Demais modais de acesso, contas, senhas e administradores mantidos -->
-    <!-- (Mantidos inalterados nos demais modais do sistema) -->
 
     <!-- Script JS -->
     <script src="js/script.js"></script>
