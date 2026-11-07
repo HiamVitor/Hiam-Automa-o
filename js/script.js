@@ -1405,7 +1405,7 @@ function switchSubPage(page) {
     const tabTv = document.getElementById('tab-tv');
     ['filmes', 'series', 'animes', 'detalhes'].forEach(s => {
         const el = document.getElementById('subpage-' + s);
-        if (el) el.classList.0 ? el.classList.add('hidden') : el.classList.add('hidden');
+        if (el) el.classList.add('hidden');
     });
 
     // Limpa a caixa de pesquisa ao trocar de página
