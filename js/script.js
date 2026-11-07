@@ -145,10 +145,10 @@ async function carregarDadosNuvem() {
         if (docSnap.exists()) {
             const dados = docSnap.data();
             
-            if (dados.mediaList && typeof mediaList !== 'undefined') mediaList = dados.mediaList;
-            if (dados.acessosList && typeof acessosList !== 'undefined') acessosList = dados.acessosList;
-            if (dados.senhasPessoaisList && typeof senhasPessoaisList !== 'undefined') senhasPessoaisList = dados.senhasPessoaisList;
-            if (dados.adminsList && typeof adminsList !== 'undefined') {
+            if (dados.mediaList) mediaList = dados.mediaList;
+            if (dados.acessosList) acessosList = dados.acessosList;
+            if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
+            if (dados.adminsList) {
                 adminsList = dados.adminsList;
                 if (adminsList.length === 0) {
                     adminsList.push({
@@ -163,23 +163,26 @@ async function carregarDadosNuvem() {
 
             salvarNoLocalStorage();
 
-            // Re-renderizar as telas ativas se as funções existirem
-            if (typeof renderMediaList === 'function') {
-                renderMediaList('filmes');
-                renderMediaList('series');
-                renderMediaList('animes');
-            }
-            if (typeof renderAcessos === 'function') renderAcessos();
-            if (typeof renderContasCasa === 'function') renderContasCasa();
-            if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
-            if (typeof renderAdmins === 'function') renderAdmins();
+            renderizarTelasAtivas();
         }
     } catch (e) {
         console.error("Erro ao carregar dados da nuvem:", e);
     }
 }
 
-// Ouve alterações em tempo real (se alterar no telemóvel, o notebook atualiza sozinho instantaneamente)
+function renderizarTelasAtivas() {
+    if (typeof renderMediaList === 'function') {
+        renderMediaList('filmes');
+        renderMediaList('series');
+        renderMediaList('animes');
+    }
+    if (typeof renderAcessos === 'function') renderAcessos();
+    if (typeof renderContasCasa === 'function') renderContasCasa();
+    if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
+    if (typeof renderAdmins === 'function') renderAdmins();
+}
+
+// Ouve alterações em tempo real via Firebase
 window.addEventListener('firebase-ready', () => {
     carregarDadosNuvem();
     
@@ -188,22 +191,13 @@ window.addEventListener('firebase-ready', () => {
             if (docSnap.exists()) {
                 const dados = docSnap.data();
                 
-                if (dados.mediaList && typeof mediaList !== 'undefined') mediaList = dados.mediaList;
-                if (dados.acessosList && typeof acessosList !== 'undefined') acessosList = dados.acessosList;
-                if (dados.senhasPessoaisList && typeof senhasPessoaisList !== 'undefined') senhasPessoaisList = dados.senhasPessoaisList;
-                if (dados.adminsList && typeof adminsList !== 'undefined') adminsList = dados.adminsList;
+                if (dados.mediaList) mediaList = dados.mediaList;
+                if (dados.acessosList) acessosList = dados.acessosList;
+                if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
+                if (dados.adminsList) adminsList = dados.adminsList;
                 
                 salvarNoLocalStorage();
-
-                if (typeof renderMediaList === 'function') {
-                    renderMediaList('filmes');
-                    renderMediaList('series');
-                    renderMediaList('animes');
-                }
-                if (typeof renderAcessos === 'function') renderAcessos();
-                if (typeof renderContasCasa === 'function') renderContasCasa();
-                if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
-                if (typeof renderAdmins === 'function') renderAdmins();
+                renderizarTelasAtivas();
             }
         });
     }
@@ -215,33 +209,12 @@ function salvarNoLocalStorage() {
     localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
     localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
     
-    // Sempre que salvar localmente, sincroniza com o Firestore
     salvarDadosNuvem();
 }
 
-// Inicialização imediata caso o Firebase já esteja pronto
-setTimeout(() => {
-    if (typeof carregarDadosNuvem === 'function') {
-        carregarDadosNuvem();
-    }
-}, 300);
-
 document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
-    
-    if (typeof carregarDadosNuvem === 'function' && window.db) {
-        carregarDadosNuvem().then(() => {
-            renderAcessos();
-            renderContasCasa();
-            renderSenhasPessoais();
-            renderAdmins();
-        });
-    } else {
-        renderAcessos();
-        renderContasCasa();
-        renderSenhasPessoais();
-        renderAdmins();
-    }
+    renderizarTelasAtivas();
 });
 
 function solicitarSenhaTab(tabId) {
@@ -270,10 +243,7 @@ function verificarLoginSenhaTab(event) {
         const abaAlvo = tabPendenteParaDesbloquear;
         closeAuthModal();
         switchTab(abaAlvo);
-        renderAdmins();
-        renderContasCasa();
-        renderAcessos();
-        renderSenhasPessoais();
+        renderizarTelasAtivas();
     } else {
         alert("Login ou Senha incorretos! Tente novamente.");
         document.getElementById('input-senha-auth').value = '';
@@ -434,7 +404,7 @@ async function recarregarInformacoesTitulo() {
     if (!item) return;
 
     const icone = document.getElementById('icone-recarregar');
-    if (icone) icone.classList.add('animate-spin-slow');
+    if (icone) icone.classList.add('animate-spin');
 
     try {
         const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
@@ -514,7 +484,7 @@ async function recarregarInformacoesTitulo() {
         console.error("Erro ao recarregar dados da API:", e);
         alert("Erro de conexão ao tentar recarregar informações.");
     } finally {
-        if (icone) icone.classList.remove('animate-spin-slow');
+        if (icone) icone.classList.remove('animate-spin');
     }
 }
 
@@ -1500,18 +1470,12 @@ function switchTab(tabId) {
         targetBtn.classList.add('active', 'text-white');
         targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
     }
-    if (tabId === 'senhas') {
-        renderAcessos();
+
+    if (tabId === 'tv') {
+        switchSubPage('main');
     }
-    if (tabId === 'contas') {
-        renderContasCasa();
-    }
-    if (tabId === 'senhas-pessoais') {
-        renderSenhasPessoais();
-    }
-    if (tabId === 'administrador') {
-        renderAdmins();
-    }
+
+    renderizarTelasAtivas();
 }
 
 function switchSubPage(page) {
