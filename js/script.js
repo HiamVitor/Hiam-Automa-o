@@ -119,100 +119,21 @@ if (adminsList.length === 0) {
 }
 
 let tabPendenteParaDesbloquear = '';
-let adminLogadoAtual = adminsList[0] || null; // Garante permissão padrão inicial para testes se necessário
-
-// Função unificada para salvar na nuvem do Firestore
-async function salvarDadosNuvem() {
-    if (!window.db || !window.dbHelpers) return;
-    try {
-        await window.dbHelpers.setDoc(window.dbHelpers.doc(window.db, "dados", "principal"), {
-            mediaList: typeof mediaList !== 'undefined' ? mediaList : [],
-            acessosList: typeof acessosList !== 'undefined' ? acessosList : [],
-            senhasPessoaisList: typeof senhasPessoaisList !== 'undefined' ? senhasPessoaisList : [],
-            adminsList: typeof adminsList !== 'undefined' ? adminsList : [],
-            atualizadoEm: new Date().toISOString()
-        });
-    } catch (e) {
-        console.error("Erro ao sincronizar com a nuvem:", e);
-    }
-}
-
-// Função para carregar os dados da nuvem ao iniciar
-async function carregarDadosNuvem() {
-    if (!window.db || !window.dbHelpers) return;
-    try {
-        const docSnap = await window.dbHelpers.getDoc(window.dbHelpers.doc(window.db, "dados", "principal"));
-        if (docSnap.exists()) {
-            const dados = docSnap.data();
-            
-            if (dados.mediaList) mediaList = dados.mediaList;
-            if (dados.acessosList) acessosList = dados.acessosList;
-            if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-            if (dados.adminsList) {
-                adminsList = dados.adminsList;
-                if (adminsList.length === 0) {
-                    adminsList.push({
-                        id: Date.now(),
-                        nome: "Administrador Inicial",
-                        login: "admin",
-                        senha: "123",
-                        vip: true
-                    });
-                }
-            }
-
-            salvarNoLocalStorage();
-            renderizarTelasAtivas();
-        }
-    } catch (e) {
-        console.error("Erro ao carregar dados da nuvem:", e);
-    }
-}
-
-function renderizarTelasAtivas() {
-    if (typeof renderMediaList === 'function') {
-        renderMediaList('filmes');
-        renderMediaList('series');
-        renderMediaList('animes');
-    }
-    if (typeof renderAcessos === 'function') renderAcessos();
-    if (typeof renderContasCasa === 'function') renderContasCasa();
-    if (typeof renderSenhasPessoais === 'function') renderSenhasPessoais();
-    if (typeof renderAdmins === 'function') renderAdmins();
-}
-
-window.addEventListener('firebase-ready', () => {
-    carregarDadosNuvem();
-    
-    if (window.db && window.dbHelpers) {
-        window.dbHelpers.onSnapshot(window.dbHelpers.doc(window.db, "dados", "principal"), (docSnap) => {
-            if (docSnap.exists()) {
-                const dados = docSnap.data();
-                
-                if (dados.mediaList) mediaList = dados.mediaList;
-                if (dados.acessosList) acessosList = dados.acessosList;
-                if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-                if (dados.adminsList) adminsList = dados.adminsList;
-                
-                salvarNoLocalStorage();
-                renderizarTelasAtivas();
-            }
-        });
-    }
-});
+let adminLogadoAtual = null;
 
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
     localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
     localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
-    
-    salvarDadosNuvem();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
-    renderizarTelasAtivas();
+    renderAcessos();
+    renderContasCasa();
+    renderSenhasPessoais();
+    renderAdmins();
 });
 
 function solicitarSenhaTab(tabId) {
@@ -241,7 +162,10 @@ function verificarLoginSenhaTab(event) {
         const abaAlvo = tabPendenteParaDesbloquear;
         closeAuthModal();
         switchTab(abaAlvo);
-        renderizarTelasAtivas();
+        renderAdmins();
+        renderContasCasa();
+        renderAcessos();
+        renderSenhasPessoais();
     } else {
         alert("Login ou Senha incorretos! Tente novamente.");
         document.getElementById('input-senha-auth').value = '';
@@ -258,6 +182,7 @@ function toggleSecaoForm(secao) {
     }
 }
 
+// Função fiável de tradução automática utilizando a API pública do Google Translate
 async function traduzirParaPortugues(texto) {
     if (!texto || typeof texto !== 'string' || texto.trim() === "") return texto;
     try {
@@ -284,11 +209,6 @@ async function handleFormSubmit(event) {
     const nomeInput = document.getElementById('input-nome').value.trim();
     const tipo = document.getElementById('input-tipo').value;
     
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    const textoOriginalBotao = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Sincronizando...`;
-
     let dadosMidia = {
         genero: tipo === 'Filme' ? "Filme / Ação" : (tipo === 'Anime' ? "Anime / Ação / Aventura" : "Ação / Aventura / Fantasia"),
         resumo: `Informações detalhadas sobre ${nomeInput} obtidas do catálogo oficial.`,
@@ -340,28 +260,21 @@ async function handleFormSubmit(event) {
                     return (Number(a.number) || 0) - (Number(b.number) || 0);
                 });
 
-                const promessasEps = epsOrdenados.map(async (ep) => {
+                for (const ep of epsOrdenados) {
                     const temporadaOriginal = ep.season !== null && ep.season !== undefined && ep.season !== '' ? String(ep.season) : '1';
+                    if (!temporadasMap[temporadaOriginal]) {
+                        temporadasMap[temporadaOriginal] = [];
+                    }
+                    
                     let nomeEpOriginal = ep.name || 'Sem título';
                     let nomeEpTraduzido = await traduzirParaPortugues(nomeEpOriginal);
-                    return {
-                        temporada: temporadaOriginal,
-                        episodio: {
-                            nome: `Episódio ${ep.number || 1}: ${nomeEpTraduzido}`,
-                            assistido: false,
-                            dataCheck: ""
-                        }
-                    };
-                });
 
-                const resultadosEps = await Promise.all(promessasEps);
-
-                resultadosEps.forEach(itemRes => {
-                    if (!temporadasMap[itemRes.temporada]) {
-                        temporadasMap[itemRes.temporada] = [];
-                    }
-                    temporadasMap[itemRes.temporada].push(itemRes.episodio);
-                });
+                    temporadasMap[temporadaOriginal].push({
+                        nome: `Episódio ${ep.number || (temporadasMap[temporadaOriginal].length + 1)}: ${nomeEpTraduzido}`,
+                        assistido: false,
+                        dataCheck: ""
+                    });
+                }
 
                 dadosMidia.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
                 dadosMidia.temporadas = Object.keys(dadosMidia.temporadasDados).length || 1;
@@ -369,9 +282,6 @@ async function handleFormSubmit(event) {
         }
     } catch (e) {
         console.error("Erro ao consultar a API do TVMaze:", e);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = textoOriginalBotao;
     }
 
     const newItem = {
@@ -402,7 +312,7 @@ async function recarregarInformacoesTitulo() {
     if (!item) return;
 
     const icone = document.getElementById('icone-recarregar');
-    if (icone) icone.classList.add('animate-spin');
+    if (icone) icone.classList.add('animate-spin-slow');
 
     try {
         const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
@@ -435,8 +345,12 @@ async function recarregarInformacoesTitulo() {
                 const temporadasAntigas = item.temporadasDados || {};
                 const temporadasMap = {};
 
-                const promessasEps = show._embedded.episodes.map(async (ep) => {
+                for (const ep of show._embedded.episodes) {
                     const tempNum = ep.season || 1;
+                    if (!temporadasMap[tempNum]) {
+                        temporadasMap[tempNum] = [];
+                    }
+                    
                     let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
                     const nomeEpFormatado = `Episódio ${ep.number}: ${nomeEpTraduzido}`;
                     
@@ -450,23 +364,12 @@ async function recarregarInformacoesTitulo() {
                         }
                     }
 
-                    return {
-                        temporada: tempNum,
-                        episodio: {
-                            nome: nomeEpFormatado,
-                            assistido: jaAssistido,
-                            dataCheck: dataCheckAntiga
-                        }
-                    };
-                });
-
-                const resultadosEps = await Promise.all(promessasEps);
-                resultadosEps.forEach(itemRes => {
-                    if (!temporadasMap[itemRes.temporada]) {
-                        temporadasMap[itemRes.temporada] = [];
-                    }
-                    temporadasMap[itemRes.temporada].push(itemRes.episodio);
-                });
+                    temporadasMap[tempNum].push({
+                        nome: nomeEpFormatado,
+                        assistido: jaAssistido,
+                        dataCheck: dataCheckAntiga
+                    });
+                }
                 
                 item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
                 item.temporadas = Object.keys(item.temporadasDados).length;
@@ -482,7 +385,7 @@ async function recarregarInformacoesTitulo() {
         console.error("Erro ao recarregar dados da API:", e);
         alert("Erro de conexão ao tentar recarregar informações.");
     } finally {
-        if (icone) icone.classList.remove('animate-spin');
+        if (icone) icone.classList.remove('animate-spin-slow');
     }
 }
 
@@ -890,11 +793,14 @@ function renderContasCasa() {
     const btnAddContas = document.getElementById('btn-add-contas');
     if (!container) return;
 
-    // Garante exibição de botões para facilitar gestão caso adminLogadoAtual esteja ativo
-    const isVipLogado = true; // Força exibição facilitada dos botões de controlo para Hiam Vitor
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
 
     if (btnAddContas) {
-        btnAddContas.classList.remove('hidden');
+        if (isVipLogado) {
+            btnAddContas.classList.remove('hidden');
+        } else {
+            btnAddContas.classList.add('hidden');
+        }
     }
 
     let html = '';
@@ -927,12 +833,12 @@ function renderContasCasa() {
             aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
         }
 
-        let botoesAcaoItem = `
+        let botoesAcaoItem = isVipLogado ? `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
             </div>
-        `;
+        ` : '';
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
@@ -972,8 +878,14 @@ function renderAcessos() {
     const btnAddSenhas = document.getElementById('btn-add-senhas');
     if (!container) return;
 
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+
     if (btnAddSenhas) {
-        btnAddSenhas.classList.remove('hidden');
+        if (isVipLogado) {
+            btnAddSenhas.classList.remove('hidden');
+        } else {
+            btnAddSenhas.classList.add('hidden');
+        }
     }
 
     let html = '';
@@ -1000,12 +912,12 @@ function renderAcessos() {
             aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
         }
 
-        let botoesAcaoItem = `
+        let botoesAcaoItem = isVipLogado ? `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
             </div>
-        `;
+        ` : '';
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
@@ -1044,8 +956,30 @@ function renderSenhasPessoais() {
     const container = document.getElementById('grid-senhas-pessoais');
     if (!container) return;
 
+    if (!adminLogadoAtual) {
+        container.innerHTML = `
+            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                <i class="fa-solid fa-lock text-4xl text-amber-400 mb-3"></i>
+                <p class="text-lg font-medium text-white">Por favor, faça login com a sua conta para ver as suas senhas pessoais.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const minhasSenhas = senhasPessoaisList.filter(item => item.userLogin === adminLogadoAtual.login);
+
+    if (minhasSenhas.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                <i class="fa-solid fa-key text-4xl text-purple-400 mb-3"></i>
+                <p class="text-lg font-medium text-white">Nenhuma credencial pessoal encontrada para o utilizador <strong>${adminLogadoAtual.nome}</strong>.</p>
+            </div>
+        `;
+        return;
+    }
+
     let html = '';
-    senhasPessoaisList.forEach(item => {
+    minhasSenhas.forEach(item => {
         let linkHtml = item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center mt-1"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${item.url}</a>` : '';
 
         html += `
@@ -1080,6 +1014,11 @@ function renderSenhasPessoais() {
 }
 
 function openPersonalPassModal() {
+    if (!adminLogadoAtual) {
+        alert("Efetue login primeiro para adicionar uma credencial pessoal.");
+        solicitarSenhaTab('senhas-pessoais');
+        return;
+    }
     document.getElementById('personal-id').value = '';
     document.getElementById('personal-pass-form').reset();
     document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal';
@@ -1092,6 +1031,8 @@ function closePersonalPassModal() {
 
 function handlePersonalPassSubmit(event) {
     event.preventDefault();
+    if (!adminLogadoAtual) return;
+
     const idInput = document.getElementById('personal-id').value;
     const servico = document.getElementById('pers-servico').value.trim();
     const url = document.getElementById('pers-url').value.trim();
@@ -1100,7 +1041,7 @@ function handlePersonalPassSubmit(event) {
 
     if (idInput) {
         const item = senhasPessoaisList.find(p => p.id == idInput);
-        if (item) {
+        if (item && item.userLogin === adminLogadoAtual.login) {
             item.servico = servico;
             item.url = url;
             item.login = login;
@@ -1109,7 +1050,7 @@ function handlePersonalPassSubmit(event) {
     } else {
         const novoItem = {
             id: Date.now(),
-            userLogin: adminLogadoAtual ? adminLogadoAtual.login : 'admin',
+            userLogin: adminLogadoAtual.login,
             servico,
             url,
             login,
@@ -1150,8 +1091,14 @@ function renderAdmins() {
     const btnAddAdmin = document.getElementById('btn-add-admin-container');
     if (!container) return;
 
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+
     if (btnAddAdmin) {
-        btnAddAdmin.classList.remove('hidden');
+        if (isVipLogado) {
+            btnAddAdmin.classList.remove('hidden');
+        } else {
+            btnAddAdmin.classList.add('hidden');
+        }
     }
 
     if (adminsList.length === 0) {
@@ -1163,12 +1110,12 @@ function renderAdmins() {
     adminsList.forEach(adm => {
         let badgeVip = adm.vip ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md ml-2 uppercase">VIP</span>` : `<span class="bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-medium px-2 py-0.5 rounded-md ml-2 uppercase">Normal</span>`;
         
-        let botoesAcao = `
+        let botoesAcao = isVipLogado ? `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAdminModal(${adm.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Administrador"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAdmin(${adm.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Remover Administrador"><i class="fa-solid fa-trash"></i></button>
             </div>
-        `;
+        ` : '';
 
         html += `
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
@@ -1186,6 +1133,11 @@ function renderAdmins() {
 }
 
 function openAdminModal() {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem adicionar novos administradores.");
+        return;
+    }
     document.getElementById('admin-modal').classList.remove('hidden');
 }
 
@@ -1196,6 +1148,12 @@ function closeAdminModal() {
 
 function handleAdminSubmit(event) {
     event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado!");
+        return;
+    }
+
     const novoAdmin = {
         id: Date.now(),
         nome: document.getElementById('adm-nome').value,
@@ -1211,6 +1169,12 @@ function handleAdminSubmit(event) {
 }
 
 function openEditAdminModal(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem editar.");
+        return;
+    }
+
     const adm = adminsList.find(a => a.id === id);
     if (!adm) return;
 
@@ -1230,6 +1194,12 @@ function closeEditAdminModal() {
 
 function handleEditAdminSubmit(event) {
     event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado!");
+        return;
+    }
+
     const id = parseInt(document.getElementById('edit-adm-id').value);
     const adm = adminsList.find(a => a.id === id);
     if (!adm) return;
@@ -1245,6 +1215,12 @@ function handleEditAdminSubmit(event) {
 }
 
 function deleteAdmin(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem excluir.");
+        return;
+    }
+
     if (confirm("Deseja realmente remover este administrador?")) {
         adminsList = adminsList.filter(a => a.id !== id);
         salvarNoLocalStorage();
@@ -1259,6 +1235,11 @@ function copiarTexto(texto) {
 }
 
 function openAccessModal() {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem adicionar novos acessos/contas.");
+        return;
+    }
     document.getElementById('access-modal').classList.remove('hidden');
 }
 
@@ -1269,6 +1250,9 @@ function closeAccessModal() {
 
 function handleAccessSubmit(event) {
     event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) return;
+
     const temLuz = document.getElementById('chk-luz').checked;
     const temAgua = document.getElementById('chk-agua').checked;
 
@@ -1295,6 +1279,12 @@ function handleAccessSubmit(event) {
 }
 
 function openEditAccessModal(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem editar.");
+        return;
+    }
+
     const acc = acessosList.find(a => a.id === id);
     if (!acc) return;
 
@@ -1319,6 +1309,9 @@ function closeEditAccessModal() {
 
 function handleEditAccessSubmit(event) {
     event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) return;
+
     const id = parseInt(document.getElementById('edit-acc-id').value);
     const acc = acessosList.find(a => a.id === id);
     if (!acc) return;
@@ -1340,6 +1333,12 @@ function handleEditAccessSubmit(event) {
 }
 
 function deleteAccess(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem excluir.");
+        return;
+    }
+
     if (confirm("Deseja realmente excluir este registo?")) {
         acessosList = acessosList.filter(a => a.id !== id);
         salvarNoLocalStorage();
@@ -1372,12 +1371,18 @@ function switchTab(tabId) {
         targetBtn.classList.add('active', 'text-white');
         targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
     }
-
-    if (tabId === 'tv') {
-        switchSubPage('main');
+    if (tabId === 'senhas') {
+        renderAcessos();
     }
-
-    renderizarTelasAtivas();
+    if (tabId === 'contas') {
+        renderContasCasa();
+    }
+    if (tabId === 'senhas-pessoais') {
+        renderSenhasPessoais();
+    }
+    if (tabId === 'administrador') {
+        renderAdmins();
+    }
 }
 
 function switchSubPage(page) {
