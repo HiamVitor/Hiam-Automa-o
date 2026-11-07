@@ -48,7 +48,7 @@ let currentActiveCategory = 'filmes';
 let currentOpenItemId = null;
 let currentSelectedTemp = 1;
 let temporadasDadosTempEdicao = {};
-let termoBuscaAtual = ''; // Guarda o texto da barra de pesquisa atual
+let termoBuscaAtual = '';
 
 let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
     {
@@ -95,19 +95,17 @@ let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 // GESTÃO DE SESSÃO E INATIVIDADE (15 MIN)
 // ==========================================
 let temporizadorInatividade = null;
-const TEMPO_LIMITE_INATIVIDADE = 15 * 60 * 1000; // 15 minutos em milissegundos
+const TEMPO_LIMITE_INATIVIDADE = 15 * 60 * 1000;
 
 function reiniciarTemporizadorInatividade() {
     clearTimeout(temporizadorInatividade);
     temporizadorInatividade = setTimeout(() => {
-        // Expirou por inatividade
-        adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0]; // Retorna para admin padrão ou bloqueia
+        adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
         switchTab('home');
         console.warn("Sessão bloqueada por inatividade.");
     }, TEMPO_LIMITE_INATIVIDADE);
 }
 
-// Eventos de atividade do utilizador
 ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evento => {
     window.addEventListener(evento, reiniciarTemporizadorInatividade);
 });
@@ -159,6 +157,12 @@ async function carregarDadosDaNuvem() {
                             }
                         }
                     }
+
+                    // CORREÇÃO: Atualiza o localStorage ao receber os dados da nuvem (essencial para novos dispositivos)
+                    localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
+                    localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
+                    localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
+                    localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
 
                     renderizarInterfaceCompleta();
                     atualizarTimestampSyncWeb();
@@ -585,9 +589,6 @@ function handleEditItemSubmit(event) {
     renderizarConteudoDetalhes();
 }
 
-// ==========================================
-// FUNÇÕES DE PESQUISA NAS SUBPÁGINAS
-// ==========================================
 function filtrarMediaLista(category) {
     const inputId = 'input-busca-' + category;
     const inputEl = document.getElementById(inputId);
@@ -606,7 +607,6 @@ function renderMediaList(category) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // Filtra por tipo e também pelo termo digitado na pesquisa
     const filteredItems = mediaList.filter(item => {
         const matchTipo = item.tipo === tipoFiltro;
         const matchTermo = !termoBuscaAtual || item.nome.toLowerCase().includes(termoBuscaAtual) || (item.genero && item.genero.toLowerCase().includes(termoBuscaAtual));
@@ -1408,7 +1408,6 @@ function switchSubPage(page) {
         if (el) el.classList.add('hidden');
     });
 
-    // Limpa a caixa de pesquisa ao trocar de página
     termoBuscaAtual = '';
     ['filmes', 'series', 'animes'].forEach(cat => {
         const inputB = document.getElementById('input-busca-' + cat);
