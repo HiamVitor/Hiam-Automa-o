@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .sidebar-tab {
     transform: skewX(-10deg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -16,23 +15,4 @@
 }
 .animate-spin-slow {
     animation: spin-slow 1s linear infinite;
-=======
-.sidebar-tab {
-    transform: skewX(-10deg);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar-tab:hover {
-    transform: skewX(-10deg) translateX(6px);
-}
-.sidebar-tab.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-}
-@keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-.animate-spin-slow {
-    animation: spin-slow 1s linear infinite;
->>>>>>> ee6e52190ff2fc54b0a1a775f56900918245d102
 }
