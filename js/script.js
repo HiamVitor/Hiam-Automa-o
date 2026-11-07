@@ -1,4 +1,3 @@
-// Normaliza as chaves das temporadas para uma sequência limpa: 1, 2, 3...
 function normalizarTemporadasSequenciais(temporadasDados) {
     const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
     const chavesOrdenadas = Object.keys(dados).sort((a, b) => {
@@ -15,7 +14,6 @@ function normalizarTemporadasSequenciais(temporadasDados) {
 }
 
 let mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || [];
-
 let currentActiveCategory = 'filmes';
 let currentOpenItemId = null;
 let currentSelectedTemp = 1;
@@ -35,76 +33,10 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
         aguaCpf: "75442280968",
         aguaMatricula: "6706592",
         aguaSenha: "Hiam.235"
-    },
-    {
-        id: 2,
-        nome: "Casa Velha",
-        morada: "Rua Dos Crisântemos - Morro Estevão",
-        temLuz: true,
-        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
-        luzLogin: "2847",
-        luzSenha: "25172517",
-        temAgua: true,
-        aguaPortal: "https://e.casan.com.br/",
-        aguaCpf: "83396861949",
-        aguaMatricula: "06175678",
-        aguaSenha: ""
-    },
-    {
-        id: 3,
-        nome: "Casa Verde - 366",
-        morada: "Rua Etelvina de Oliveira Muniz - Morro Estevão",
-        temLuz: true,
-        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
-        luzLogin: "hiamvitorb@gmail.com",
-        luzSenha: "Hiam.235",
-        temAgua: true,
-        aguaPortal: "https://e.casan.com.br/",
-        aguaCpf: "75442280968",
-        aguaMatricula: "6706592",
-        aguaSenha: "Hiam.235"
-    },
-    {
-        id: 4,
-        nome: "Casa da Praia - 153",
-        morada: "Rincão Zona Norte",
-        temLuz: true,
-        luzPortal: "https://agencia.cooperalianca.com.br/AgenciaVirtual/",
-        luzLogin: "UC: 12415",
-        luzSenha: "25172517",
-        temAgua: true,
-        aguaPortal: "https://samaerincao.com.br/",
-        aguaCpf: "619.481.289-34",
-        aguaMatricula: "521071",
-        aguaSenha: ""
-    },
-    {
-        id: 5,
-        nome: "Casa Nova",
-        morada: "",
-        temLuz: true,
-        luzPortal: "",
-        luzLogin: "",
-        luzSenha: "",
-        temAgua: true,
-        aguaPortal: "",
-        aguaCpf: "",
-        aguaMatricula: "",
-        aguaSenha: ""
     }
 ];
 
-let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [
-    {
-        id: 1,
-        userLogin: "admin",
-        servico: "GitHub",
-        url: "https://github.com",
-        login: "hiamvitor",
-        senha: "HiamGitHub2026!"
-    }
-];
-
+let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
 let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
 
 if (adminsList.length === 0) {
@@ -121,7 +53,7 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = null;
 
-// Salvamento otimizado em segundo plano (Não trava o ecrã nem os cliques do utilizador)[cite: 1, 2, 5]
+// Salva localmente e envia para o Firebase em background (sem congelar a tela)
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -139,12 +71,12 @@ function salvarNoLocalStorage() {
             adminsList,
             ultimaAtualizacao: new Date().toISOString()
         }).catch(e => {
-            console.error("Erro secundário na sync com o Firebase:", e);
+            console.error("Erro ao sincronizar com o Firebase:", e);
         });
     }
 }
 
-// Carregar e escutar dados da nuvem em tempo real de forma isolada[cite: 1]
+// Carrega os dados do Firebase e mantém a escuta ativa em tempo real para qualquer aparelho[cite: 1]
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
@@ -210,18 +142,14 @@ function forcarAtualizacaoGeralDispositivos() {
     const labelRede = document.getElementById('label-status-rede');
     if (labelRede) labelRede.innerText = "A atualizar...";
 
+    carregarDadosDaNuvem();
+
     setTimeout(() => {
-        mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || mediaList;
-        acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || acessosList;
-        senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || senhasPessoaisList;
-        adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || adminsList;
-
         renderizarInterfaceCompleta();
-
         if (labelRede) labelRede.innerText = "Web Sincronizada";
         atualizarTimestampSyncWeb();
-        alert("Dispositivos atualizados com sucesso!");
-    }, 400);
+        alert("Dispositivos atualizados com sucesso a partir da nuvem!");
+    }, 600);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -271,8 +199,10 @@ function verificarLoginSenhaTab(event) {
 function toggleSecaoForm(secao) {
     const chk = document.getElementById(`chk-${secao}`);
     const container = document.getElementById(`container-campos-${secao}`);
-    if (chk.checked) container.classList.remove('hidden');
-    else container.classList.add('hidden');
+    if (chk && container) {
+        if (chk.checked) container.classList.remove('hidden');
+        else container.classList.add('hidden');
+    }
 }
 
 async function traduzirParaPortugues(texto) {
