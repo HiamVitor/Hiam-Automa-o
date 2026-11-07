@@ -98,28 +98,39 @@ function salvarNoLocalStorage() {
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
-            const { doc, getDoc, onSnapshot } = window.dbHelpers;
+            const { doc, getDoc, onSnapshot, setDoc } = window.dbHelpers;
             const docRef = doc(window.db, "dados", "principal");
             
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const dados = docSnap.data();
-                if (dados.mediaList) mediaList = dados.mediaList;
-                if (dados.acessosList) acessosList = dados.acessosList;
-                if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-                if (dados.adminsList) {
-                    adminsList = dados.adminsList;
-                    if (adminLogadoAtual) {
-                        const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
-                        if (adminAtualizado) {
-                            adminLogadoAtual = adminAtualizado;
-                        } else {
-                            adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const dados = docSnap.data();
+                    if (dados.mediaList) mediaList = dados.mediaList;
+                    if (dados.acessosList) acessosList = dados.acessosList;
+                    if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
+                    if (dados.adminsList) {
+                        adminsList = dados.adminsList;
+                        if (adminLogadoAtual) {
+                            const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                            if (adminAtualizado) {
+                                adminLogadoAtual = adminAtualizado;
+                            } else {
+                                adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                            }
                         }
                     }
+                    renderizarInterfaceCompleta();
+                } else {
+                    await setDoc(docRef, {
+                        mediaList: JSON.parse(JSON.stringify(mediaList)),
+                        acessosList: JSON.parse(JSON.stringify(acessosList)),
+                        senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
+                        adminsList: JSON.parse(JSON.stringify(adminsList)),
+                        ultimaAtualizacao: new Date().toISOString()
+                    });
                 }
-
-                renderizarInterfaceCompleta();
+            } catch (err) {
+                console.warn("Aviso ao ler documento inicial do Firestore:", err);
             }
 
             onSnapshot(docRef, (docSnapSnapshot) => {
@@ -143,7 +154,10 @@ async function carregarDadosDaNuvem() {
                     renderizarInterfaceCompleta();
                     atualizarTimestampSyncWeb();
                 }
+            }, (error) => {
+                console.error("Erro no listener onSnapshot do Firebase:", error);
             });
+
         } catch (e) {
             console.error("Erro ao carregar dados do Firebase:", e);
         }
