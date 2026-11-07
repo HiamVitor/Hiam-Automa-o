@@ -118,10 +118,9 @@ if (adminsList.length === 0) {
 }
 
 let tabPendenteParaDesbloquear = '';
-// Garante sessão ativa como VIP por predefinição para exibir os controlos corretamente (como na Imagem 2)
 let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
-// Salva localmente e envia para o Firebase no caminho correto: coleção 'dados', documento 'principal'[cite: 3]
+// Salva localmente e sincroniza imediatamente com o Firebase na coleção 'dados', documento 'principal'[cite: 1, 3]
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -146,7 +145,7 @@ function salvarNoLocalStorage() {
     }
 }
 
-// Carrega os dados do Firebase e mantém a escuta ativa em tempo real para qualquer aparelho[cite: 1, 3]
+// Carrega os dados da nuvem e mantém a escuta ativa em tempo real para todos os dispositivos[cite: 1, 3]
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
@@ -161,25 +160,38 @@ async function carregarDadosDaNuvem() {
                 if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
                 if (dados.adminsList) {
                     adminsList = dados.adminsList;
-                    if (!adminLogadoAtual || !adminsList.some(a => a.login === adminLogadoAtual.login)) {
-                        adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                    if (adminLogadoAtual) {
+                        const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                        if (adminAtualizado) {
+                            adminLogadoAtual = adminAtualizado;
+                        } else {
+                            adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                        }
                     }
                 }
 
                 renderizarInterfaceCompleta();
             }
 
-            onSnapshot(docRef, (doc) => {
-                if (doc.exists()) {
-                    const dados = doc.data();
-                    let novoJson = JSON.stringify(dados.mediaList);
-                    let atualJson = JSON.stringify(mediaList);
+            onSnapshot(docRef, (docSnapSnapshot) => {
+                if (docSnapSnapshot.exists()) {
+                    const dados = docSnapSnapshot.data();
+                    let novoJson = JSON.stringify(dados.mediaList) + JSON.stringify(dados.adminsList) + JSON.stringify(dados.acessosList);
+                    let atualJson = JSON.stringify(mediaList) + JSON.stringify(adminsList) + JSON.stringify(acessosList);
                     
                     if (novoJson && novoJson !== atualJson) {
                         mediaList = dados.mediaList || mediaList;
                         acessosList = dados.acessosList || acessosList;
                         senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
-                        if (dados.adminsList) adminsList = dados.adminsList;
+                        if (dados.adminsList) {
+                            adminsList = dados.adminsList;
+                            if (adminLogadoAtual) {
+                                const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                                if (adminAtualizado) {
+                                    adminLogadoAtual = adminAtualizado;
+                                }
+                            }
+                        }
 
                         renderizarInterfaceCompleta();
                         atualizarTimestampSyncWeb();
@@ -1087,6 +1099,10 @@ function handleEditAdminSubmit(event) {
     adm.login = document.getElementById('edit-adm-login').value;
     adm.senha = document.getElementById('edit-adm-senha').value;
     adm.vip = document.getElementById('edit-adm-vip').checked;
+
+    if (adminLogadoAtual.id === adm.id) {
+        adminLogadoAtual = adm;
+    }
 
     salvarNoLocalStorage();
     closeEditAdminModal();
