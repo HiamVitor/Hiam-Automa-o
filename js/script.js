@@ -120,7 +120,7 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
-// Salva localmente e sincroniza imediatamente com o Firebase na coleção 'dados', documento 'principal'[cite: 1, 3]
+// Salva localmente e sincroniza imediatamente com o Firebase na coleção 'dados', documento 'principal'[cite: 3]
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -132,12 +132,12 @@ function salvarNoLocalStorage() {
     if (window.db && window.dbHelpers) {
         const { doc, setDoc } = window.dbHelpers;
         setDoc(doc(window.db, "dados", "principal"), {
-            mediaList,
-            acessosList,
-            senhasPessoaisList,
-            adminsList,
+            mediaList: JSON.parse(JSON.stringify(mediaList)),
+            acessosList: JSON.parse(JSON.stringify(acessosList)),
+            senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
+            adminsList: JSON.parse(JSON.stringify(adminsList)),
             ultimaAtualizacao: new Date().toISOString()
-        }).then(() => {
+        }, { merge: true }).then(() => {
             console.log("Dados sincronizados com sucesso na nuvem do Firebase.");
         }).catch(e => {
             console.error("Erro ao sincronizar com o Firebase:", e);
@@ -176,26 +176,23 @@ async function carregarDadosDaNuvem() {
             onSnapshot(docRef, (docSnapSnapshot) => {
                 if (docSnapSnapshot.exists()) {
                     const dados = docSnapSnapshot.data();
-                    let novoJson = JSON.stringify(dados.mediaList) + JSON.stringify(dados.adminsList) + JSON.stringify(dados.acessosList);
-                    let atualJson = JSON.stringify(mediaList) + JSON.stringify(adminsList) + JSON.stringify(acessosList);
                     
-                    if (novoJson && novoJson !== atualJson) {
-                        mediaList = dados.mediaList || mediaList;
-                        acessosList = dados.acessosList || acessosList;
-                        senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
-                        if (dados.adminsList) {
-                            adminsList = dados.adminsList;
-                            if (adminLogadoAtual) {
-                                const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
-                                if (adminAtualizado) {
-                                    adminLogadoAtual = adminAtualizado;
-                                }
+                    mediaList = dados.mediaList || mediaList;
+                    acessosList = dados.acessosList || acessosList;
+                    senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
+                    
+                    if (dados.adminsList) {
+                        adminsList = dados.adminsList;
+                        if (adminLogadoAtual) {
+                            const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
+                            if (adminAtualizado) {
+                                adminLogadoAtual = adminAtualizado;
                             }
                         }
-
-                        renderizarInterfaceCompleta();
-                        atualizarTimestampSyncWeb();
                     }
+
+                    renderizarInterfaceCompleta();
+                    atualizarTimestampSyncWeb();
                 }
             });
         } catch (e) {
