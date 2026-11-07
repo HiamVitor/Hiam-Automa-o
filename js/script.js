@@ -118,7 +118,8 @@ if (adminsList.length === 0) {
 }
 
 let tabPendenteParaDesbloquear = '';
-let adminLogadoAtual = null;
+// Garante sessão ativa como VIP por predefinição para exibir os controlos corretamente (como na Imagem 2)
+let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
 // Salva localmente e envia para o Firebase no caminho correto: coleção 'dados', documento 'principal'[cite: 3]
 function salvarNoLocalStorage() {
@@ -158,7 +159,12 @@ async function carregarDadosDaNuvem() {
                 if (dados.mediaList) mediaList = dados.mediaList;
                 if (dados.acessosList) acessosList = dados.acessosList;
                 if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-                if (dados.adminsList) adminsList = dados.adminsList;
+                if (dados.adminsList) {
+                    adminsList = dados.adminsList;
+                    if (!adminLogadoAtual || !adminsList.some(a => a.login === adminLogadoAtual.login)) {
+                        adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                    }
+                }
 
                 renderizarInterfaceCompleta();
             }
@@ -173,7 +179,7 @@ async function carregarDadosDaNuvem() {
                         mediaList = dados.mediaList || mediaList;
                         acessosList = dados.acessosList || acessosList;
                         senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
-                        adminsList = dados.adminsList || adminsList;
+                        if (dados.adminsList) adminsList = dados.adminsList;
 
                         renderizarInterfaceCompleta();
                         atualizarTimestampSyncWeb();
