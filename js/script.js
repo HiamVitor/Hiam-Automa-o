@@ -48,6 +48,7 @@ let currentActiveCategory = 'filmes';
 let currentOpenItemId = null;
 let currentSelectedTemp = 1;
 let temporadasDadosTempEdicao = {};
+let termoBuscaAtual = ''; // Guarda o texto da barra de pesquisa atual
 
 let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
     {
@@ -90,6 +91,27 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
+// ==========================================
+// GESTÃO DE SESSÃO E INATIVIDADE (15 MIN)
+// ==========================================
+let temporizadorInatividade = null;
+const TEMPO_LIMITE_INATIVIDADE = 15 * 60 * 1000; // 15 minutos em milissegundos
+
+function reiniciarTemporizadorInatividade() {
+    clearTimeout(temporizadorInatividade);
+    temporizadorInatividade = setTimeout(() => {
+        // Expirou por inatividade
+        adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0]; // Retorna para admin padrão ou bloqueia
+        switchTab('home');
+        console.warn("Sessão bloqueada por inatividade.");
+    }, TEMPO_LIMITE_INATIVIDADE);
+}
+
+// Eventos de atividade do utilizador
+['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evento => {
+    window.addEventListener(evento, reiniciarTemporizadorInatividade);
+});
+
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -120,7 +142,6 @@ async function carregarDadosDaNuvem() {
             const { doc, onSnapshot, setDoc } = window.dbHelpers;
             const docRef = doc(window.db, "dados", "principal");
             
-            // O onSnapshot lida com a carga inicial e atualizações em tempo real num novo dispositivo
             onSnapshot(docRef, async (docSnapSnapshot) => {
                 if (docSnapSnapshot.exists()) {
                     const dados = docSnapSnapshot.data();
@@ -202,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
     renderizarInterfaceCompleta();
     atualizarTimestampSyncWeb();
+    reiniciarTemporizadorInatividade();
 
     window.addEventListener('firebase-ready', () => {
         carregarDadosDaNuvem();
@@ -563,6 +585,18 @@ function handleEditItemSubmit(event) {
     renderizarConteudoDetalhes();
 }
 
+// ==========================================
+// FUNÇÕES DE PESQUISA NAS SUBPÁGINAS
+// ==========================================
+function filtrarMediaLista(category) {
+    const inputId = 'input-busca-' + category;
+    const inputEl = document.getElementById(inputId);
+    if (inputEl) {
+        termoBuscaAtual = inputEl.value.toLowerCase().trim();
+    }
+    renderMediaList(category);
+}
+
 function renderMediaList(category) {
     let containerId = '', tipoFiltro = '', accentColor = '', iconClass = '';
     if (category === 'filmes') { containerId = 'grid-filmes'; tipoFiltro = 'Filme'; accentColor = 'cyan'; iconClass = 'fa-film'; }
@@ -571,13 +605,19 @@ function renderMediaList(category) {
 
     const container = document.getElementById(containerId);
     if (!container) return;
-    const filteredItems = mediaList.filter(item => item.tipo === tipoFiltro);
+
+    // Filtra por tipo e também pelo termo digitado na pesquisa
+    const filteredItems = mediaList.filter(item => {
+        const matchTipo = item.tipo === tipoFiltro;
+        const matchTermo = !termoBuscaAtual || item.nome.toLowerCase().includes(termoBuscaAtual) || (item.genero && item.genero.toLowerCase().includes(termoBuscaAtual));
+        return matchTipo && matchTermo;
+    });
 
     if (filteredItems.length === 0) {
         container.innerHTML = `
             <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
                 <i class="fa-solid ${iconClass} text-4xl text-${accentColor}-400 mb-3"></i>
-                <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} adicionado ainda.</p>
+                <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} encontrado.</p>
             </div>
         `;
         return;
@@ -1365,7 +1405,14 @@ function switchSubPage(page) {
     const tabTv = document.getElementById('tab-tv');
     ['filmes', 'series', 'animes', 'detalhes'].forEach(s => {
         const el = document.getElementById('subpage-' + s);
-        if (el) el.classList.add('hidden');
+        if (el) el.classList.0 ? el.classList.add('hidden') : el.classList.add('hidden');
+    });
+
+    // Limpa a caixa de pesquisa ao trocar de página
+    termoBuscaAtual = '';
+    ['filmes', 'series', 'animes'].forEach(cat => {
+        const inputB = document.getElementById('input-busca-' + cat);
+        if (inputB) inputB.value = '';
     });
 
     if (page === 'main') {
