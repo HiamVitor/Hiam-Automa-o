@@ -121,32 +121,92 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = null;
 
-function salvarNoLocalStorage() {
+// Função principal de salvamento (Sincroniza local e envia para a nuvem Firebase)[cite: 1, 2]
+async function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
     localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
     localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
     
-    // Atualiza o carimbo de tempo da última sincronização na Web
     atualizarTimestampSyncWeb();
+
+    if (window.db && window.dbHelpers) {
+        try {
+            const { doc, setDoc } = window.dbHelpers;
+            await setDoc(doc(window.db, "sistema", "dadosGerais"), {
+                mediaList,
+                acessosList,
+                senhasPessoaisList,
+                adminsList,
+                ultimaAtualizacao: new Date().toISOString()
+            });
+        } catch (e) {
+            console.error("Erro ao sincronizar com o Firebase:", e);
+        }
+    }
 }
 
-// Atualiza o carimbo visual de sincronização web
+// Carregar e escutar dados da nuvem em tempo real[cite: 1]
+async function carregarDadosDaNuvem() {
+    if (window.db && window.dbHelpers) {
+        try {
+            const { doc, getDoc, onSnapshot } = window.dbHelpers;
+            const docRef = doc(window.db, "sistema", "dadosGerais");
+            
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const dados = docSnap.data();
+                if (dados.mediaList) mediaList = dados.mediaList;
+                if (dados.acessosList) acessosList = dados.acessosList;
+                if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
+                if (dados.adminsList) adminsList = dados.adminsList;
+
+                renderizarInterfaceCompleta();
+            }
+
+            // Ouve alterações em tempo real de qualquer outro aparelho ligado[cite: 1]
+            onSnapshot(docRef, (doc) => {
+                if (doc.exists()) {
+                    const dados = doc.data();
+                    mediaList = dados.mediaList || mediaList;
+                    acessosList = dados.acessosList || acessosList;
+                    senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
+                    adminsList = dados.adminsList || adminsList;
+
+                    renderizarInterfaceCompleta();
+                    atualizarTimestampSyncWeb();
+                }
+            });
+        } catch (e) {
+            console.error("Erro ao carregar dados do Firebase:", e);
+        }
+    }
+}
+
+function renderizarInterfaceCompleta() {
+    renderAcessos();
+    renderContasCasa();
+    renderSenhasPessoais();
+    renderAdmins();
+    if (!document.getElementById('subpage-detalhes').classList.contains('hidden')) {
+        renderizarConteudoDetalhes();
+    }
+    if (!document.getElementById('subpage-' + currentActiveCategory).classList.contains('hidden')) {
+        renderMediaList(currentActiveCategory);
+    }
+}
+
 function atualizarTimestampSyncWeb() {
     const el = document.getElementById('timestamp-sync');
     if (el) {
         const agora = new Date();
-        const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        el.innerText = `Última sync web: ${horaFormatada}`;
+        el.innerText = `Última sync web: ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`[cite: 1];
     }
 }
 
-// Função para forçar a atualização imediata de todos os dispositivos e recarregar dados
 function forcarAtualizacaoGeralDispositivos() {
     const labelRede = document.getElementById('label-status-rede');
-    if (labelRede) {
-        labelRede.innerText = "A atualizar dispositivos...";
-    }
+    if (labelRede) labelRede.innerText = "A atualizar dispositivos...";
 
     setTimeout(() => {
         mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || mediaList;
@@ -154,25 +214,22 @@ function forcarAtualizacaoGeralDispositivos() {
         senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || senhasPessoaisList;
         adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || adminsList;
 
-        renderAcessos();
-        renderContasCasa();
-        renderSenhasPessoais();
-        renderAdmins();
+        renderizarInterfaceCompleta();
 
-        if (labelRede) {
-            labelRede.innerText = "Web Sincronizada";
-        }
+        if (labelRede) labelRede.innerText = "Web Sincronizada";
         atualizarTimestampSyncWeb();
-        alert("Todos os dispositivos conectados foram atualizados com sucesso a partir da web!");
-    }, 600);
+        alert("Todos os dispositivos conectados foram atualizados com sucesso!");[cite: 1, 2]
+    }, 500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
-    renderAcessos();
-    renderContasCasa();
-    renderSenhasPessoais();
-    renderAdmins();
+    
+    window.addEventListener('firebase-ready', () => {
+        carregarDadosDaNuvem();
+    });
+
+    renderizarInterfaceCompleta();
     atualizarTimestampSyncWeb();
 });
 
@@ -202,10 +259,7 @@ function verificarLoginSenhaTab(event) {
         const abaAlvo = tabPendenteParaDesbloquear;
         closeAuthModal();
         switchTab(abaAlvo);
-        renderAdmins();
-        renderContasCasa();
-        renderAcessos();
-        renderSenhasPessoais();
+        renderizarInterfaceCompleta();
     } else {
         alert("Login ou Senha incorretos! Tente novamente.");
         document.getElementById('input-senha-auth').value = '';
@@ -338,7 +392,7 @@ async function handleFormSubmit(event) {
     };
 
     mediaList.push(newItem);
-    salvarNoLocalStorage();
+    await salvarNoLocalStorage();
     closeModal();
 
     if (tipo === 'Filme') switchSubPage('filmes');
@@ -414,7 +468,7 @@ async function recarregarInformacoesTitulo() {
                 item.temporadas = Object.keys(item.temporadasDados).length;
             }
 
-            salvarNoLocalStorage();
+            await salvarNoLocalStorage();
             renderizarConteudoDetalhes();
             alert("Informações recarregadas e traduzidas com sucesso para Português!");
         } else {
@@ -445,4 +499,973 @@ function closeModal() {
     if(form) form.reset();
 }
 
-// Demais funções do script mantidas idênticas (renderMediaList, openDetails, renderContasCasa, renderAcessos, etc.)...
+function openEditItemModal() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    document.getElementById('edit-item-nome').value = item.nome;
+    document.getElementById('edit-item-tipo').value = item.tipo;
+    document.getElementById('edit-item-genero').value = item.genero || '';
+    document.getElementById('edit-item-lancamento').value = item.lancamento || '';
+    document.getElementById('edit-item-termino').value = item.termino || '';
+    document.getElementById('edit-item-temporadas').value = item.temporadas || 1;
+    document.getElementById('edit-item-poster').value = item.poster || '';
+    document.getElementById('manual-textarea-massa').value = '';
+
+    temporadasDadosTempEdicao = JSON.parse(JSON.stringify(item.temporadasDados || {}));
+    renderizarListaEpisodiosModal();
+
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+}
+
+function closeEditItemModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+}
+
+function renderizarListaEpisodiosModal() {
+    const container = document.getElementById('lista-episodios-modal');
+    let html = '';
+    let temEp = false;
+
+    for (let temp in temporadasDadosTempEdicao) {
+        temporadasDadosTempEdicao[temp].forEach((ep, idx) => {
+            temEp = true;
+            html += `
+                <div class="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs">
+                    <span class="text-slate-200"><strong>T${temp} - E${idx+1}:</strong> ${ep.nome}</span>
+                    <button type="button" onclick="removerEpisodioManual('${temp}', ${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+        });
+    }
+
+    if (!temEp) {
+        html = `<p class="text-xs text-slate-500 italic">Nenhum episódio cadastrado ainda.</p>`;
+    }
+    container.innerHTML = html;
+}
+
+function processarColagemMassa() {
+    const texto = document.getElementById('manual-textarea-massa').value;
+    if (!texto || texto.trim() === '') {
+        alert("Cole o conteúdo copiado da planilha no campo de texto primeiro.");
+        return;
+    }
+
+    const linhas = texto.split('\n');
+    let adicionados = 0;
+
+    linhas.forEach(linha => {
+        if (!linha.trim()) return;
+        const colunas = linha.split(/\t+|\s{2,}/).map(c => c.trim()).filter(c => c !== '');
+
+        let temp = "1";
+        let numEp = "1";
+        let nomeEp = "";
+
+        if (colunas.length >= 3) {
+            temp = colunas[0].replace(/\D/g, '') || "1";
+            numEp = colunas[1].replace(/\D/g, '') || "1";
+            nomeEp = colunas.slice(2).join(" ");
+        } else if (colunas.length === 2) {
+            numEp = colunas[0].replace(/\D/g, '') || "1";
+            nomeEp = colunas[1];
+        } else if (colunas.length === 1) {
+            nomeEp = colunas[0];
+        }
+
+        if (nomeEp) {
+            if (!temporadasDadosTempEdicao[temp]) {
+                temporadasDadosTempEdicao[temp] = [];
+            }
+
+            temporadasDadosTempEdicao[temp].push({
+                nome: `Episódio ${numEp}: ${nomeEp}`,
+                assistido: false,
+                dataCheck: ""
+            });
+            adicionados++;
+        }
+    });
+
+    if (adicionados > 0) {
+        document.getElementById('manual-textarea-massa').value = '';
+        renderizarListaEpisodiosModal();
+        alert(`${adicionados} episódios adicionados com sucesso! Não se esqueça de clicar em "Salvar Alterações" no fim do modal.`);
+    } else {
+        alert("Não foi possível detetar dados válidos nas linhas coladas. Verifique o formato.");
+    }
+}
+
+function removerEpisodioManual(temp, idx) {
+    if (temporadasDadosTempEdicao[temp]) {
+        temporadasDadosTempEdicao[temp].splice(idx, 1);
+        if (temporadasDadosTempEdicao[temp].length === 0) {
+            delete temporadasDadosTempEdicao[temp];
+        }
+        renderizarListaEpisodiosModal();
+    }
+}
+
+async function handleEditItemSubmit(event) {
+    event.preventDefault();
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    item.nome = document.getElementById('edit-item-nome').value.trim();
+    item.tipo = document.getElementById('edit-item-tipo').value;
+    item.genero = document.getElementById('edit-item-genero').value.trim();
+    item.lancamento = document.getElementById('edit-item-lancamento').value;
+    item.termino = document.getElementById('edit-item-termino').value.trim();
+    item.temporadas = parseInt(document.getElementById('edit-item-temporadas').value) || 1;
+    item.poster = document.getElementById('edit-item-poster').value.trim();
+    item.temporadasDados = temporadasDadosTempEdicao;
+
+    await salvarNoLocalStorage();
+    closeEditItemModal();
+    
+    document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+    document.getElementById('detalhe-categoria-tag').innerText = item.tipo;
+    renderizarConteudoDetalhes();
+}
+
+function renderMediaList(category) {
+    let containerId = '', tipoFiltro = '', accentColor = '', iconClass = '';
+    if (category === 'filmes') { containerId = 'grid-filmes'; tipoFiltro = 'Filme'; accentColor = 'cyan'; iconClass = 'fa-film'; }
+    else if (category === 'series') { containerId = 'grid-series'; tipoFiltro = 'Série'; accentColor = 'indigo'; iconClass = 'fa-tv'; }
+    else if (category === 'animes') { containerId = 'grid-animes'; tipoFiltro = 'Anime'; accentColor = 'pink'; iconClass = 'fa-video'; }
+
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const filteredItems = mediaList.filter(item => item.tipo === tipoFiltro);
+
+    if (filteredItems.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                <i class="fa-solid ${iconClass} text-4xl text-${accentColor}-400 mb-3"></i>
+                <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} adicionado ainda.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    filteredItems.forEach(item => {
+        let allDone = true;
+        for (let t in item.temporadasDados) {
+            item.temporadasDados[t].forEach(ep => {
+                if (!ep.assistido) allDone = false;
+            });
+        }
+        let statusText = allDone ? "Concluído" : "Não Concluído";
+        let badgeStyle = allDone ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        const totalTemps = Object.keys(item.temporadasDados || {}).length;
+
+        html += `
+            <div onclick="openDetails(${item.id})" class="group cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-${accentColor}-500/50 rounded-2xl overflow-hidden transition-all shadow-xl flex flex-col justify-between hover:-translate-y-1">
+                <div class="h-64 w-full overflow-hidden relative bg-slate-950 flex items-center justify-center">
+                    <img src="${item.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop'}" alt="${item.nome}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute top-3 right-3">
+                        <span class="text-xs px-2.5 py-1 rounded-md border font-semibold backdrop-blur-md bg-slate-950/80 ${badgeStyle}">${statusText}</span>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-1 group-hover:text-${accentColor}-400 transition">${item.nome}</h3>
+                        <p class="text-xs text-${accentColor}-400 font-medium mb-3">${item.genero || 'Gênero não informado'}</p>
+                        
+                        <div class="space-y-1.5 text-xs text-slate-300 border-t border-slate-800/80 pt-3">
+                            <p><strong>Lançamento:</strong> ${item.lancamento ? item.lancamento.split('-').reverse().join('/') : '-'}</p>
+                            <p><strong>Término:</strong> ${item.termino || '-'}</p>
+                            <p><strong>Temporadas:</strong> ${totalTemps} Temp.</p>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs">
+                        <span class="text-amber-400 font-medium">${'⭐'.repeat(item.avaliacao || 0)} (Avaliação)</span>
+                        <span onclick="event.stopPropagation(); deleteItem(${item.id}, '${category}')" class="text-rose-400 hover:text-rose-300 transition font-medium"><i class="fa-solid fa-trash mr-1"></i> Apagar</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function openDetails(id) {
+    const item = mediaList.find(m => m.id === id);
+    if (!item) return;
+
+    currentOpenItemId = id;
+    const tempsDisponiveis = Object.keys(item.temporadasDados || {});
+    currentSelectedTemp = tempsDisponiveis.length > 0 ? tempsDisponiveis[0] : 1;
+
+    ['filmes', 'series', 'animes'].forEach(s => {
+        const el = document.getElementById('subpage-' + s);
+        if (el) el.classList.add('hidden');
+    });
+
+    const detalheTab = document.getElementById('subpage-detalhes');
+    detalheTab.classList.remove('hidden');
+
+    document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+    document.getElementById('detalhe-categoria-tag').innerText = item.tipo;
+    document.getElementById('btn-voltar-detalhes').setAttribute('onclick', `switchSubPage('${currentActiveCategory}')`);
+
+    renderizarConteudoDetalhes();
+}
+
+function renderizarConteudoDetalhes() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    let accentColor = item.tipo === 'Filme' ? 'cyan' : (item.tipo === 'Série' ? 'indigo' : 'pink');
+
+    let allDone = true;
+    for (let t in item.temporadasDados) {
+        item.temporadasDados[t].forEach(ep => {
+            if (!ep.assistido) allDone = false;
+        });
+    }
+
+    const badgeStatus = document.getElementById('detalhe-status-badge');
+    if (allDone) {
+        badgeStatus.innerText = "Concluído";
+        badgeStatus.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+    } else {
+        badgeStatus.innerText = "Não Concluído";
+        badgeStatus.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+    }
+
+    let optionsTemp = '';
+    const temporadasChaves = Object.keys(item.temporadasDados || {}).sort((a, b) => Number(a) - Number(b));
+    temporadasChaves.forEach(t => {
+        optionsTemp += `<option value="${t}" ${currentSelectedTemp == t ? 'selected' : ''}>Temporada ${t}</option>`;
+    });
+
+    let epsHtml = '';
+    let listaEps = item.temporadasDados[currentSelectedTemp] || [];
+
+    if (listaEps.length > 0) {
+        listaEps.forEach((ep, idx) => {
+            epsHtml += `
+                <div class="flex items-center justify-between bg-slate-950 px-4 py-3 rounded-xl border border-slate-800 text-sm">
+                    <div class="space-y-1">
+                        <span class="text-slate-200 block">${ep.nome}</span>
+                        <span id="data-ep-${currentSelectedTemp}-${idx}" class="text-[10px] text-slate-500 block">${ep.assistido && ep.dataCheck ? 'Check em: ' + ep.dataCheck : ''}</span>
+                    </div>
+                    <label class="flex items-center space-x-2 cursor-pointer select-none">
+                        <span id="label-ep-${currentSelectedTemp}-${idx}" class="text-xs font-semibold ${ep.assistido ? 'text-emerald-400' : 'text-slate-400'}">${ep.assistido ? 'Assistido' : 'Não Assistido'}</span>
+                        <input type="checkbox" ${ep.assistido ? 'checked' : ''} onchange="toggleEpisodio(${item.id}, '${currentSelectedTemp}', ${idx})" class="w-4 h-4 rounded accent-blue-600 cursor-pointer">
+                    </label>
+                </div>
+            `;
+        });
+    } else {
+        epsHtml = `<p class="text-xs text-slate-400">Nenhum episódio cadastrado para esta temporada.</p>`;
+    }
+
+    let container = document.getElementById('detalhe-conteudo');
+    container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+            <div class="md:col-span-1 overflow-hidden rounded-2xl shadow-2xl bg-slate-950 flex items-center justify-center">
+                <img src="${item.poster || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop'}" alt="${item.nome}" class="w-full h-auto object-cover rounded-2xl max-h-[450px]">
+            </div>
+
+            <div class="md:col-span-3 space-y-6">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-${accentColor}-400 font-bold">${item.genero || 'Gênero'}</span>
+                    <h3 class="text-3xl font-extrabold text-white mt-1">${item.nome}</h3>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Resumo</h4>
+                    <p class="text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">${item.resumo}</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-300 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+                    <p><strong>Lançamento:</strong> ${item.lancamento ? item.lancamento.split('-').reverse().join('/') : '-'}</p>
+                    <p><strong>Término:</strong> ${item.termino || '-'}</p>
+                    <p><strong>Temporadas:</strong> ${temporadasChaves.length} Temp.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Lista de Episódios & Progresso</h4>
+                        <select onchange="mudarTemporada(this.value)" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer">
+                            ${optionsTemp}
+                        </select>
+                    </div>
+                    <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        ${epsHtml}
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Minha Avaliação ⭐</h4>
+                        <p class="text-xs text-slate-500">Selecione de 1 a 5 estrelas</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select id="select-avaliacao-${item.id}" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            <option value="5" ${item.avaliacao === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ (5/5)</option>
+                            <option value="4" ${item.avaliacao === 4 ? 'selected' : ''}>⭐⭐⭐⭐ (4/5)</option>
+                            <option value="3" ${item.avaliacao === 3 ? 'selected' : ''}>⭐⭐⭐ (3/5)</option>
+                            <option value="2" ${item.avaliacao === 2 ? 'selected' : ''}>⭐⭐ (2/5)</option>
+                            <option value="1" ${item.avaliacao === 1 ? 'selected' : ''}>⭐ (1/5)</option>
+                        </select>
+                        <button onclick="salvarAvaliacao(${item.id})" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function mudarTemporada(tempNum) {
+    currentSelectedTemp = tempNum;
+    renderizarConteudoDetalhes();
+}
+
+async function toggleEpisodio(itemId, tempNum, epIndex) {
+    const item = mediaList.find(m => m.id === itemId);
+    if (item && item.temporadasDados[tempNum] && item.temporadasDados[tempNum][epIndex]) {
+        const ep = item.temporadasDados[tempNum][epIndex];
+        ep.assistido = !ep.assistido;
+
+        if (ep.assistido) {
+            const agora = new Date();
+            ep.dataCheck = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        } else {
+            ep.dataCheck = "";
+        }
+
+        await salvarNoLocalStorage();
+        renderizarConteudoDetalhes();
+    }
+}
+
+async function salvarAvaliacao(id) {
+    const select = document.getElementById(`select-avaliacao-${id}`);
+    const novaNota = parseInt(select.value);
+    const item = mediaList.find(m => m.id === id);
+    if (item) {
+        item.avaliacao = novaNota;
+        await salvarNoLocalStorage();
+        alert("Avaliação salva com sucesso!");
+    }
+}
+
+async function deleteItem(id, category) {
+    mediaList = mediaList.filter(item => item.id !== id);
+    await salvarNoLocalStorage();
+    switchSubPage(category);
+}
+
+async function removerPorCategoria(tipoCategoria) {
+    if (confirm(`Deseja realmente remover todos os itens da categoria ${tipoCategoria}?`)) {
+        mediaList = mediaList.filter(item => item.tipo !== tipoCategoria);
+        await salvarNoLocalStorage();
+        if (tipoCategoria === 'Filme') renderMediaList('filmes');
+        else if (tipoCategoria === 'Série') renderMediaList('series');
+        else if (tipoCategoria === 'Anime') renderMediaList('animes');
+    }
+}
+
+async function removerTodosTitulos() {
+    if (confirm("Deseja realmente remover TODOS os filmes, séries e animes cadastrados?")) {
+        mediaList = [];
+        await salvarNoLocalStorage();
+        switchSubPage('main');
+    }
+}
+
+function renderContasCasa() {
+    const container = document.getElementById('grid-contas-casa');
+    const btnAddContas = document.getElementById('btn-add-contas');
+    if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddContas) {
+        if (isVipLogado) btnAddContas.classList.remove('hidden');
+        else btnAddContas.classList.add('hidden');
+    }
+
+    let html = '';
+    acessosList.forEach(acc => {
+        let exibirLuz = acc.temLuz !== false;
+        let exibirAgua = acc.temAgua !== false;
+
+        let luzCamposHtml = '';
+        if (acc.luzPortal && acc.luzPortal.trim() !== '') {
+            luzCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.luzPortal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> Energia - ${acc.luzPortal}</a></div>`;
+        }
+        if (acc.luzLogin && acc.luzLogin.trim() !== '' && acc.luzLogin !== '-') {
+            luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.luzSenha && acc.luzSenha.trim() !== '' && acc.luzSenha !== '-') {
+            luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+
+        let aguaCamposHtml = '';
+        if (acc.aguaPortal && acc.aguaPortal.trim() !== '') {
+            aguaCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.aguaPortal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> Agua - ${acc.aguaPortal}</a></div>`;
+        }
+        if (acc.aguaCpf && acc.aguaCpf.trim() !== '' && acc.aguaCpf !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.aguaMatricula && acc.aguaMatricula.trim() !== '' && acc.aguaMatricula !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.aguaSenha && acc.aguaSenha.trim() !== '' && acc.aguaSenha !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+
+        let botoesAcaoItem = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
+        html += `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i> ${acc.morada || 'Morada não informada'}</p>
+                    </div>
+                    ${botoesAcaoItem}
+                </div>
+
+                ${exibirLuz && luzCamposHtml !== '' ? `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block"><i class="fa-solid fa-bolt mr-1"></i> Energia / Luz</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-1">${luzCamposHtml}</div>
+                </div>` : ''}
+
+                ${exibirAgua && aguaCamposHtml !== '' ? `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block"><i class="fa-solid fa-faucet-drip mr-1"></i> Água / Saneamento</span>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs pt-1">${aguaCamposHtml}</div>
+                </div>` : ''}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function renderAcessos() {
+    const container = document.getElementById('grid-acessos');
+    const btnAddSenhas = document.getElementById('btn-add-senhas');
+    if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddSenhas) {
+        if (isVipLogado) btnAddSenhas.classList.remove('hidden');
+        else btnAddSenhas.classList.add('hidden');
+    }
+
+    let html = '';
+    acessosList.forEach(acc => {
+        let exibirLuz = acc.temLuz !== false;
+        let exibirAgua = acc.temAgua !== false;
+
+        let luzCamposHtml = '';
+        if (acc.luzLogin && acc.luzLogin.trim() !== '' && acc.luzLogin !== '-') {
+            luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.luzSenha && acc.luzSenha.trim() !== '' && acc.luzSenha !== '-') {
+            luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+
+        let aguaCamposHtml = '';
+        if (acc.aguaCpf && acc.aguaCpf.trim() !== '' && acc.aguaCpf !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.aguaMatricula && acc.aguaMatricula.trim() !== '' && acc.aguaMatricula !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+        if (acc.aguaSenha && acc.aguaSenha.trim() !== '' && acc.aguaSenha !== '-') {
+            aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
+        }
+
+        let botoesAcaoItem = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
+        html += `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fa-solid fa-house-user text-amber-400 mr-2"></i> ${acc.nome}
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i> ${acc.morada || 'Morada não informada'}</p>
+                    </div>
+                    ${botoesAcaoItem}
+                </div>
+
+                ${exibirLuz && luzCamposHtml !== '' ? `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block"><i class="fa-solid fa-bolt mr-1"></i> Energia / Luz</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-1">${luzCamposHtml}</div>
+                </div>` : ''}
+
+                ${exibirAgua && aguaCamposHtml !== '' ? `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block"><i class="fa-solid fa-faucet-drip mr-1"></i> Água / Saneamento</span>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs pt-1">${aguaCamposHtml}</div>
+                </div>` : ''}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function renderSenhasPessoais() {
+    const container = document.getElementById('grid-senhas-pessoais');
+    if (!container) return;
+
+    if (!adminLogadoAtual) {
+        container.innerHTML = `
+            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                <i class="fa-solid fa-lock text-4xl text-amber-400 mb-3"></i>
+                <p class="text-lg font-medium text-white">Por favor, faça login com a sua conta para ver as suas senhas pessoais.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const minhasSenhas = senhasPessoaisList.filter(item => item.userLogin === adminLogadoAtual.login);
+
+    if (minhasSenhas.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
+                <i class="fa-solid fa-key text-4xl text-purple-400 mb-3"></i>
+                <p class="text-lg font-medium text-white">Nenhuma credencial pessoal encontrada para o utilizador <strong>${adminLogadoAtual.nome}</strong>.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    minhasSenhas.forEach(item => {
+        let linkHtml = item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center mt-1"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${item.url}</a>` : '';
+
+        html += `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fa-solid fa-key text-purple-400 mr-2"></i> ${item.servico}
+                        </h3>
+                        ${linkHtml}
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="openEditPersonalPassModal(${item.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deletePersonalPass(${item.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2 text-xs">
+                    <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800">
+                        <span class="text-slate-400 truncate">Login: <strong class="text-white">${item.login}</strong></span>
+                        <button onclick="copiarTexto('${item.login}')" class="text-slate-400 hover:text-purple-400 px-1.5 py-0.5 text-[10px]" title="Copiar Login"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800">
+                        <span class="text-slate-400 truncate">Senha: <strong class="text-white">${item.senha}</strong></span>
+                        <button onclick="copiarTexto('${item.senha}')" class="text-slate-400 hover:text-purple-400 px-1.5 py-0.5 text-[10px]" title="Copiar Senha"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function openPersonalPassModal() {
+    if (!adminLogadoAtual) {
+        alert("Efetue login primeiro para adicionar uma credencial pessoal.");
+        solicitarSenhaTab('senhas-pessoais');
+        return;
+    }
+    document.getElementById('personal-id').value = '';
+    document.getElementById('personal-pass-form').reset();
+    document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal';
+    document.getElementById('personal-pass-modal').classList.remove('hidden');
+}
+
+function closePersonalPassModal() {
+    document.getElementById('personal-pass-modal').classList.add('hidden');
+}
+
+async function handlePersonalPassSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual) return;
+
+    const idInput = document.getElementById('personal-id').value;
+    const servico = document.getElementById('pers-servico').value.trim();
+    const url = document.getElementById('pers-url').value.trim();
+    const login = document.getElementById('pers-login').value.trim();
+    const senha = document.getElementById('pers-senha').value.trim();
+
+    if (idInput) {
+        const item = senhasPessoaisList.find(p => p.id == idInput);
+        if (item && item.userLogin === adminLogadoAtual.login) {
+            item.servico = servico;
+            item.url = url;
+            item.login = login;
+            item.senha = senha;
+        }
+    } else {
+        const novoItem = {
+            id: Date.now(),
+            userLogin: adminLogadoAtual.login,
+            servico,
+            url,
+            login,
+            senha
+        };
+        senhasPessoaisList.push(novoItem);
+    }
+
+    await salvarNoLocalStorage();
+    closePersonalPassModal();
+    renderSenhasPessoais();
+}
+
+function openEditPersonalPassModal(id) {
+    const item = senhasPessoaisList.find(p => p.id === id);
+    if (!item) return;
+
+    document.getElementById('personal-id').value = item.id;
+    document.getElementById('pers-servico').value = item.servico;
+    document.getElementById('pers-url').value = item.url || '';
+    document.getElementById('pers-login').value = item.login;
+    document.getElementById('pers-senha').value = item.senha;
+    document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Credencial Pessoal';
+    
+    document.getElementById('personal-pass-modal').classList.remove('hidden');
+}
+
+async function deletePersonalPass(id) {
+    if (confirm("Deseja realmente remover esta credencial pessoal?")) {
+        senhasPessoaisList = senhasPessoaisList.filter(p => p.id !== id);
+        await salvarNoLocalStorage();
+        renderSenhasPessoais();
+    }
+}
+
+function renderAdmins() {
+    const container = document.getElementById('lista-admins');
+    const btnAddAdmin = document.getElementById('btn-add-admin-container');
+    if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddAdmin) {
+        if (isVipLogado) btnAddAdmin.classList.remove('hidden');
+        else btnAddAdmin.classList.add('hidden');
+    }
+
+    if (adminsList.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">Nenhum administrador registado.</p>`;
+        return;
+    }
+
+    let html = '';
+    adminsList.forEach(adm => {
+        let badgeVip = adm.vip ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md ml-2 uppercase">VIP</span>` : `<span class="bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-medium px-2 py-0.5 rounded-md ml-2 uppercase">Normal</span>`;
+        
+        let botoesAcao = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAdminModal(${adm.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Administrador"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAdmin(${adm.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Remover Administrador"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
+        html += `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
+                <div class="space-y-1">
+                    <h4 class="text-sm font-bold text-white flex items-center">
+                        <i class="fa-solid fa-user-shield text-blue-400 mr-2 text-xs"></i> ${adm.nome} ${badgeVip}
+                    </h4>
+                    <p class="text-xs text-slate-400">Login: <span class="text-slate-200">${adm.login}</span></p>
+                </div>
+                ${botoesAcao}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function openAdminModal() {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem adicionar novos administradores.");
+        return;
+    }
+    document.getElementById('admin-modal').classList.remove('hidden');
+}
+
+function closeAdminModal() {
+    document.getElementById('admin-modal').classList.add('hidden');
+    document.getElementById('admin-form').reset();
+}
+
+async function handleAdminSubmit(event) {
+    event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado!");
+        return;
+    }
+
+    const novoAdmin = {
+        id: Date.now(),
+        nome: document.getElementById('adm-nome').value,
+        login: document.getElementById('adm-login').value,
+        senha: document.getElementById('adm-senha').value,
+        vip: document.getElementById('adm-vip').checked
+    };
+
+    adminsList.push(novoAdmin);
+    await salvarNoLocalStorage();
+    closeAdminModal();
+    renderAdmins();
+}
+
+function openEditAdminModal(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem editar.");
+        return;
+    }
+
+    const adm = adminsList.find(a => a.id === id);
+    if (!adm) return;
+
+    document.getElementById('edit-adm-id').value = adm.id;
+    document.getElementById('edit-adm-nome').value = adm.nome;
+    document.getElementById('edit-adm-login').value = adm.login;
+    document.getElementById('edit-adm-senha').value = adm.senha;
+    document.getElementById('edit-adm-vip').checked = adm.vip;
+
+    document.getElementById('edit-admin-modal').classList.remove('hidden');
+}
+
+function closeEditAdminModal() {
+    document.getElementById('edit-admin-modal').classList.add('hidden');
+    document.getElementById('edit-admin-form').reset();
+}
+
+async function handleEditAdminSubmit(event) {
+    event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado!");
+        return;
+    }
+
+    const id = parseInt(document.getElementById('edit-adm-id').value);
+    const adm = adminsList.find(a => a.id === id);
+    if (!adm) return;
+
+    adm.nome = document.getElementById('edit-adm-nome').value;
+    adm.login = document.getElementById('edit-adm-login').value;
+    adm.senha = document.getElementById('edit-adm-senha').value;
+    adm.vip = document.getElementById('edit-adm-vip').checked;
+
+    await salvarNoLocalStorage();
+    closeEditAdminModal();
+    renderAdmins();
+}
+
+async function deleteAdmin(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem excluir.");
+        return;
+    }
+
+    if (confirm("Deseja realmente remover este administrador?")) {
+        adminsList = adminsList.filter(a => a.id !== id);
+        await salvarNoLocalStorage();
+        renderAdmins();
+    }
+}
+
+function copiarTexto(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert("Copiado para a área de transferência: " + texto);
+    });
+}
+
+function openAccessModal() {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem adicionar novos acessos/contas.");
+        return;
+    }
+    document.getElementById('access-modal').classList.remove('hidden');
+}
+
+function closeAccessModal() {
+    document.getElementById('access-modal').classList.add('hidden');
+    document.getElementById('access-form').reset();
+}
+
+async function handleAccessSubmit(event) {
+    event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) return;
+
+    const temLuz = document.getElementById('chk-luz').checked;
+    const temAgua = document.getElementById('chk-agua').checked;
+
+    const novoAcesso = {
+        id: Date.now(),
+        nome: document.getElementById('acc-nome').value,
+        morada: document.getElementById('acc-morada').value,
+        temLuz: temLuz,
+        luzPortal: temLuz ? document.getElementById('acc-luz-portal').value : '',
+        luzLogin: temLuz ? document.getElementById('acc-luz-login').value : '',
+        luzSenha: temLuz ? document.getElementById('acc-luz-senha').value : '',
+        temAgua: temAgua,
+        aguaPortal: temAgua ? document.getElementById('acc-agua-portal').value : '',
+        aguaCpf: temAgua ? document.getElementById('acc-agua-cpf').value : '',
+        aguaMatricula: temAgua ? document.getElementById('acc-agua-mat').value : '',
+        aguaSenha: temAgua ? document.getElementById('acc-agua-senha').value : ''
+    };
+
+    acessosList.push(novoAcesso);
+    await salvarNoLocalStorage();
+    closeAccessModal();
+    renderAcessos();
+    renderContasCasa();
+}
+
+function openEditAccessModal(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem editar.");
+        return;
+    }
+
+    const acc = acessosList.find(a => a.id === id);
+    if (!acc) return;
+
+    document.getElementById('edit-acc-id').value = acc.id;
+    document.getElementById('edit-acc-nome').value = acc.nome;
+    document.getElementById('edit-acc-morada').value = acc.morada || '';
+    document.getElementById('edit-acc-luz-portal').value = acc.luzPortal || '';
+    document.getElementById('edit-acc-luz-login').value = acc.luzLogin || '';
+    document.getElementById('edit-acc-luz-senha').value = acc.luzSenha || '';
+    document.getElementById('edit-acc-agua-portal').value = acc.aguaPortal || '';
+    document.getElementById('edit-acc-agua-cpf').value = acc.aguaCpf || '';
+    document.getElementById('edit-acc-agua-mat').value = acc.aguaMatricula || '';
+    document.getElementById('edit-acc-agua-senha').value = acc.aguaSenha || '';
+
+    document.getElementById('edit-access-modal').classList.remove('hidden');
+}
+
+function closeEditAccessModal() {
+    document.getElementById('edit-access-modal').classList.add('hidden');
+    document.getElementById('edit-access-form').reset();
+}
+
+async function handleEditAccessSubmit(event) {
+    event.preventDefault();
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) return;
+
+    const id = parseInt(document.getElementById('edit-acc-id').value);
+    const acc = acessosList.find(a => a.id === id);
+    if (!acc) return;
+
+    acc.nome = document.getElementById('edit-acc-nome').value;
+    acc.morada = document.getElementById('edit-acc-morada').value;
+    acc.luzPortal = document.getElementById('edit-acc-luz-portal').value;
+    acc.luzLogin = document.getElementById('edit-acc-luz-login').value;
+    acc.luzSenha = document.getElementById('edit-acc-luz-senha').value;
+    acc.aguaPortal = document.getElementById('edit-acc-agua-portal').value;
+    acc.aguaCpf = document.getElementById('edit-acc-agua-cpf').value;
+    acc.aguaMatricula = document.getElementById('edit-acc-agua-mat').value;
+    acc.aguaSenha = document.getElementById('edit-acc-agua-senha').value;
+
+    await salvarNoLocalStorage();
+    closeEditAccessModal();
+    renderAcessos();
+    renderContasCasa();
+}
+
+async function deleteAccess(id) {
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (!isVipLogado) {
+        alert("Acesso negado! Apenas administradores VIP podem excluir.");
+        return;
+    }
+
+    if (confirm("Deseja realmente excluir este registo?")) {
+        acessosList = acessosList.filter(a => a.id !== id);
+        await salvarNoLocalStorage();
+        renderAcessos();
+        renderContasCasa();
+    }
+}
+
+function switchTab(tabId) {
+    const tabs = ['home', 'automacao', 'tv', 'contas', 'senhas', 'senhas-pessoais', 'administrador'];
+    tabs.forEach(t => {
+        const element = document.getElementById('tab-' + t);
+        const btn = document.getElementById('btn-' + t);
+        if (element) element.classList.add('hidden');
+        if (btn) {
+            btn.classList.remove('active', 'bg-gradient-to-br', 'from-blue-600', 'to-indigo-600', 'shadow-lg', 'text-white');
+            btn.classList.add('bg-slate-900/60', 'text-slate-400', 'border-slate-800');
+        }
+    });
+
+    ['filmes', 'series', 'animes', 'detalhes'].forEach(sub => {
+        const subEl = document.getElementById('subpage-' + sub);
+        if (subEl) subEl.classList.add('hidden');
+    });
+
+    const targetTab = document.getElementById('tab-' + tabId);
+    const targetBtn = document.getElementById('btn-' + tabId);
+    if (targetTab) targetTab.classList.remove('hidden');
+    if (targetBtn) {
+        targetBtn.classList.add('active', 'text-white');
+        targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
+    }
+    if (tabId === 'senhas') renderAcessos();
+    if (tabId === 'contas') renderContasCasa();
+    if (tabId === 'senhas-pessoais') renderSenhasPessoais();
+    if (tabId === 'administrador') renderAdmins();
+}
+
+function switchSubPage(page) {
+    const tabTv = document.getElementById('tab-tv');
+    
+    ['filmes', 'series', 'animes', 'detalhes'].forEach(s => {
+        const el = document.getElementById('subpage-' + s);
+        if (el) el.classList.add('hidden');
+    });
+
+    if (page === 'main') {
+        if (tabTv) tabTv.classList.remove('hidden');
+    } else {
+        if (tabTv) tabTv.classList.add('hidden');
+        currentActiveCategory = page;
+        const targetSub = document.getElementById('subpage-' + page);
+        if (targetSub) {
+            targetSub.classList.remove('hidden');
+            renderMediaList(page);
+        }
+    }
+}
