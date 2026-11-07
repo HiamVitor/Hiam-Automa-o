@@ -501,6 +501,7 @@ function removerTodosTitulos() {
     }
 }
 
+// Funções de Recarregar e Editar Títulos (Restauradas)
 async function recarregarInformacoesTitulo() {
     const item = mediaList.find(m => m.id === currentOpenItemId);
     if (!item) return;
@@ -561,6 +562,7 @@ function openEditItemModal() {
     }
 }
 
+// Funções para Modais e Gestão de Contas / Acessos / Admins (Restauradas)
 function renderContasCasa() {
     const container = document.getElementById('grid-contas-casa');
     if (!container) return;
