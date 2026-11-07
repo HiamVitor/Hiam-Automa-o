@@ -1,3 +1,4 @@
+// Normaliza as chaves das temporadas para uma sequência limpa: 1, 2, 3...
 function normalizarTemporadasSequenciais(temporadasDados) {
     const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
     const chavesOrdenadas = Object.keys(dados).sort((a, b) => {
@@ -17,6 +18,7 @@ let mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || [];
 let currentActiveCategory = 'filmes';
 let currentOpenItemId = null;
 let currentSelectedTemp = 1;
+let temporadasDadosTempEdicao = {};
 
 let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
     {
@@ -32,10 +34,76 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
         aguaCpf: "75442280968",
         aguaMatricula: "6706592",
         aguaSenha: "Hiam.235"
+    },
+    {
+        id: 2,
+        nome: "Casa Velha",
+        morada: "Rua Dos Crisântemos - Morro Estevão",
+        temLuz: true,
+        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
+        luzLogin: "2847",
+        luzSenha: "25172517",
+        temAgua: true,
+        aguaPortal: "https://e.casan.com.br/",
+        aguaCpf: "83396861949",
+        aguaMatricula: "06175678",
+        aguaSenha: ""
+    },
+    {
+        id: 3,
+        nome: "Casa Verde - 366",
+        morada: "Rua Etelvina de Oliveira Muniz - Morro Estevão",
+        temLuz: true,
+        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
+        luzLogin: "hiamvitorb@gmail.com",
+        luzSenha: "Hiam.235",
+        temAgua: true,
+        aguaPortal: "https://e.casan.com.br/",
+        aguaCpf: "75442280968",
+        aguaMatricula: "6706592",
+        aguaSenha: "Hiam.235"
+    },
+    {
+        id: 4,
+        nome: "Casa da Praia - 153",
+        morada: "Rincão Zona Norte",
+        temLuz: true,
+        luzPortal: "https://agencia.cooperalianca.com.br/AgenciaVirtual/",
+        luzLogin: "UC: 12415",
+        luzSenha: "25172517",
+        temAgua: true,
+        aguaPortal: "https://samaerincao.com.br/",
+        aguaCpf: "619.481.289-34",
+        aguaMatricula: "521071",
+        aguaSenha: ""
+    },
+    {
+        id: 5,
+        nome: "Casa Nova",
+        morada: "",
+        temLuz: true,
+        luzPortal: "",
+        luzLogin: "",
+        luzSenha: "",
+        temAgua: true,
+        aguaPortal: "",
+        aguaCpf: "",
+        aguaMatricula: "",
+        aguaSenha: ""
     }
 ];
 
-let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
+let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [
+    {
+        id: 1,
+        userLogin: "admin",
+        servico: "GitHub",
+        url: "https://github.com",
+        login: "hiamvitor",
+        senha: "HiamGitHub2026!"
+    }
+];
+
 let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
 
 if (adminsList.length === 0) {
@@ -52,7 +120,7 @@ if (adminsList.length === 0) {
 let tabPendenteParaDesbloquear = '';
 let adminLogadoAtual = null;
 
-// Salva localmente e envia para o Firebase no caminho correto: coleção 'dados', documento 'principal'
+// Salva localmente e envia para o Firebase no caminho correto: coleção 'dados', documento 'principal'[cite: 3]
 function salvarNoLocalStorage() {
     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -77,7 +145,7 @@ function salvarNoLocalStorage() {
     }
 }
 
-// Carrega os dados do Firebase e mantém a escuta ativa em tempo real para qualquer aparelho[cite: 1]
+// Carrega os dados do Firebase e mantém a escuta ativa em tempo real para qualquer aparelho[cite: 1, 3]
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
@@ -126,7 +194,7 @@ function renderizarInterfaceCompleta() {
     if (!document.getElementById('subpage-detalhes').classList.contains('hidden')) {
         renderizarConteudoDetalhes();
     }
-    if (!document.getElementById('subpage-' + currentActiveCategory).classList.contains('hidden')) {
+    if (currentActiveCategory && !document.getElementById('subpage-' + currentActiveCategory).classList.contains('hidden')) {
         renderMediaList(currentActiveCategory);
     }
 }
@@ -254,7 +322,11 @@ async function handleFormSubmit(event) {
                 dadosMidia.genero = await traduzirParaPortugues(show.genres.join(" / "));
             }
             let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : dadosMidia.resumo;
-            dadosMidia.resumo = await traduzirParaPortugues(resumoOriginal);
+            let resumoTraduzido = await traduzirParaPortugues(resumoOriginal);
+            if (resumoTraduzido.length > 450) {
+                resumoTraduzido = resumoTraduzido.substring(0, 447) + "...";
+            }
+            dadosMidia.resumo = resumoTraduzido;
             dadosMidia.lancamento = show.premiered || "2024-01-01";
             dadosMidia.termino = show.ended || "Em andamento";
             if (show.image && show.image.original) dadosMidia.poster = show.image.original;
@@ -301,6 +373,53 @@ async function handleFormSubmit(event) {
     else if (tipo === 'Anime') switchSubPage('animes');
 }
 
+async function recarregarInformacoesTitulo() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    const icone = document.getElementById('icone-recarregar');
+    if (icone) icone.classList.add('fa-spin');
+
+    try {
+        const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
+        if (response.ok) {
+            const show = await response.json();
+            if (show.genres && show.genres.length > 0) {
+                item.genero = await traduzirParaPortugues(show.genres.join(" / "));
+            }
+            let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
+            item.resumo = await traduzirParaPortugues(resumoOriginal);
+            item.lancamento = show.premiered || item.lancamento;
+            item.termino = show.ended || item.termino;
+            if (show.image && show.image.original) item.poster = show.image.original;
+
+            if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                const temporadasMap = {};
+                for (const ep of show._embedded.episodes) {
+                    const tempNum = ep.season || 1;
+                    if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                    let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                    temporadasMap[tempNum].push({
+                        nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                        assistido: false,
+                        dataCheck: ""
+                    });
+                }
+                item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                item.temporadas = Object.keys(item.temporadasDados).length || 1;
+            }
+            salvarNoLocalStorage();
+            renderizarConteudoDetalhes();
+            alert("Informações recarregadas com sucesso!");
+        }
+    } catch (e) {
+        console.error("Erro ao recarregar:", e);
+        alert("Não foi possível atualizar as informações da API.");
+    } finally {
+        if (icone) icone.classList.remove('fa-spin');
+    }
+}
+
 function openModal(defaultType) {
     const modal = document.getElementById('media-modal');
     if (defaultType) document.getElementById('input-tipo').value = defaultType;
@@ -311,6 +430,136 @@ function closeModal() {
     document.getElementById('media-modal').classList.add('hidden');
     const form = document.getElementById('media-form');
     if (form) form.reset();
+}
+
+function openEditItemModal() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    document.getElementById('edit-item-nome').value = item.nome;
+    document.getElementById('edit-item-tipo').value = item.tipo;
+    document.getElementById('edit-item-genero').value = item.genero || '';
+    document.getElementById('edit-item-lancamento').value = item.lancamento || '';
+    document.getElementById('edit-item-termino').value = item.termino || '';
+    document.getElementById('edit-item-temporadas').value = item.temporadas || 1;
+    document.getElementById('edit-item-poster').value = item.poster || '';
+    document.getElementById('manual-textarea-massa').value = '';
+
+    temporadasDadosTempEdicao = JSON.parse(JSON.stringify(item.temporadasDados || {}));
+    renderizarListaEpisodiosModal();
+
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+}
+
+function closeEditItemModal() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+}
+
+function renderizarListaEpisodiosModal() {
+    const container = document.getElementById('lista-episodios-modal');
+    if (!container) return;
+    let html = '';
+    let temEp = false;
+
+    for (let temp in temporadasDadosTempEdicao) {
+        temporadasDadosTempEdicao[temp].forEach((ep, idx) => {
+            temEp = true;
+            html += `
+                <div class="flex items-center justify-between bg-slate-900 px-3 py-2 rounded-xl border border-slate-800 text-xs">
+                    <span class="text-slate-200"><strong>T${temp} - E${idx+1}:</strong> ${ep.nome}</span>
+                    <button type="button" onclick="removerEpisodioManual('${temp}', ${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+        });
+    }
+
+    if (!temEp) {
+        html = `<p class="text-xs text-slate-500 italic">Nenhum episódio cadastrado ainda.</p>`;
+    }
+    container.innerHTML = html;
+}
+
+function processarColagemMassa() {
+    const texto = document.getElementById('manual-textarea-massa').value;
+    if (!texto || texto.trim() === '') {
+        alert("Cole o conteúdo copiado da planilha no campo de texto primeiro.");
+        return;
+    }
+
+    const linhas = texto.split('\n');
+    let adicionados = 0;
+
+    linhas.forEach(linha => {
+        if (!linha.trim()) return;
+        const colunas = linha.split('\t').map(c => c.trim()).filter(c => c !== '');
+
+        let temp = "1";
+        let numEp = "1";
+        let nomeEp = "";
+
+        if (colunas.length >= 3) {
+            temp = colunas[0].replace(/\D/g, '') || "1";
+            numEp = colunas[1].replace(/\D/g, '') || "1";
+            nomeEp = colunas.slice(2).join(" ");
+        } else if (colunas.length === 2) {
+            numEp = colunas[0].replace(/\D/g, '') || "1";
+            nomeEp = colunas[1];
+        } else if (colunas.length === 1) {
+            nomeEp = colunas[0];
+        }
+
+        if (nomeEp) {
+            if (!temporadasDadosTempEdicao[temp]) {
+                temporadasDadosTempEdicao[temp] = [];
+            }
+            temporadasDadosTempEdicao[temp].push({
+                nome: `Episódio ${numEp}: ${nomeEp}`,
+                assistido: false,
+                dataCheck: ""
+            });
+            adicionados++;
+        }
+    });
+
+    if (adicionados > 0) {
+        document.getElementById('manual-textarea-massa').value = '';
+        renderizarListaEpisodiosModal();
+        alert(`${adicionados} episódios adicionados com sucesso! Clique em "Salvar Alterações" no fim do modal para efetivar.`);
+    } else {
+        alert("Não foi possível detetar dados válidos nas linhas coladas.");
+    }
+}
+
+function removerEpisodioManual(temp, idx) {
+    if (temporadasDadosTempEdicao[temp]) {
+        temporadasDadosTempEdicao[temp].splice(idx, 1);
+        if (temporadasDadosTempEdicao[temp].length === 0) {
+            delete temporadasDadosTempEdicao[temp];
+        }
+        renderizarListaEpisodiosModal();
+    }
+}
+
+function handleEditItemSubmit(event) {
+    event.preventDefault();
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    item.nome = document.getElementById('edit-item-nome').value.trim();
+    item.tipo = document.getElementById('edit-item-tipo').value;
+    item.genero = document.getElementById('edit-item-genero').value.trim();
+    item.lancamento = document.getElementById('edit-item-lancamento').value;
+    item.termino = document.getElementById('edit-item-termino').value.trim();
+    item.temporadas = parseInt(document.getElementById('edit-item-temporadas').value) || 1;
+    item.poster = document.getElementById('edit-item-poster').value.trim();
+    item.temporadasDados = temporadasDadosTempEdicao;
+
+    salvarNoLocalStorage();
+    closeEditItemModal();
+    
+    document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+    document.getElementById('detalhe-categoria-tag').innerText = item.tipo;
+    renderizarConteudoDetalhes();
 }
 
 function renderMediaList(category) {
@@ -458,6 +707,23 @@ function renderizarConteudoDetalhes() {
                     </div>
                     <div class="space-y-2 max-h-60 overflow-y-auto pr-2">${epsHtml}</div>
                 </div>
+
+                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Minha Avaliação ⭐</h4>
+                        <p class="text-xs text-slate-500">Selecione de 1 a 5 estrelas</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select id="select-avaliacao-${item.id}" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            <option value="5" ${item.avaliacao === 5 ? 'selected' : ''}>⭐⭐⭐⭐⭐ (5/5)</option>
+                            <option value="4" ${item.avaliacao === 4 ? 'selected' : ''}>⭐⭐⭐⭐ (4/5)</option>
+                            <option value="3" ${item.avaliacao === 3 ? 'selected' : ''}>⭐⭐⭐ (3/5)</option>
+                            <option value="2" ${item.avaliacao === 2 ? 'selected' : ''}>⭐⭐ (2/5)</option>
+                            <option value="1" ${item.avaliacao === 1 ? 'selected' : ''}>⭐ (1/5)</option>
+                        </select>
+                        <button onclick="salvarAvaliacao(${item.id})" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Salvar</button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -476,6 +742,17 @@ function toggleEpisodio(itemId, tempNum, epIndex) {
         ep.dataCheck = ep.assistido ? new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : "";
         salvarNoLocalStorage();
         renderizarConteudoDetalhes();
+    }
+}
+
+function salvarAvaliacao(id) {
+    const select = document.getElementById(`select-avaliacao-${id}`);
+    const novaNota = parseInt(select.value);
+    const item = mediaList.find(m => m.id === id);
+    if (item) {
+        item.avaliacao = novaNota;
+        salvarNoLocalStorage();
+        alert("Avaliação salva com sucesso!");
     }
 }
 
@@ -501,86 +778,51 @@ function removerTodosTitulos() {
     }
 }
 
-// Funções de Recarregar e Editar Títulos (Restauradas)
-async function recarregarInformacoesTitulo() {
-    const item = mediaList.find(m => m.id === currentOpenItemId);
-    if (!item) return;
-
-    const icone = document.getElementById('icone-recarregar');
-    if (icone) icone.classList.add('fa-spin');
-
-    try {
-        const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
-        if (response.ok) {
-            const show = await response.json();
-            if (show.genres && show.genres.length > 0) {
-                item.genero = await traduzirParaPortugues(show.genres.join(" / "));
-            }
-            let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
-            item.resumo = await traduzirParaPortugues(resumoOriginal);
-            item.lancamento = show.premiered || item.lancamento;
-            item.termino = show.ended || item.termino;
-            if (show.image && show.image.original) item.poster = show.image.original;
-
-            if (show._embedded && Array.isArray(show._embedded.episodes)) {
-                const temporadasMap = {};
-                for (const ep of show._embedded.episodes) {
-                    const tempNum = ep.season || 1;
-                    if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
-                    let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
-                    temporadasMap[tempNum].push({
-                        nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
-                        assistido: false,
-                        dataCheck: ""
-                    });
-                }
-                item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
-                item.temporadas = Object.keys(item.temporadasDados).length || 1;
-            }
-            salvarNoLocalStorage();
-            renderizarConteudoDetalhes();
-            alert("Informações recarregadas com sucesso!");
-        }
-    } catch (e) {
-        console.error("Erro ao recarregar:", e);
-        alert("Não foi possível atualizar as informações da API.");
-    } finally {
-        if (icone) icone.classList.remove('fa-spin');
-    }
-}
-
-function openEditItemModal() {
-    const item = mediaList.find(m => m.id === currentOpenItemId);
-    if (!item) return;
-    const novoNome = prompt("Editar nome do título:", item.nome);
-    if (novoNome && novoNome.trim() !== "") {
-        item.nome = novoNome.trim();
-        salvarNoLocalStorage();
-        document.getElementById('detalhe-titulo-topo').innerText = item.nome;
-        renderizarConteudoDetalhes();
-        renderMediaList(currentActiveCategory);
-    }
-}
-
-// Funções para Modais e Gestão de Contas / Acessos / Admins (Restauradas)
 function renderContasCasa() {
     const container = document.getElementById('grid-contas-casa');
+    const btnAddContas = document.getElementById('btn-add-contas');
     if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddContas) {
+        if (isVipLogado) btnAddContas.classList.remove('hidden');
+        else btnAddContas.classList.add('hidden');
+    }
+
     let html = '';
     acessosList.forEach(acc => {
+        let exibirLuz = acc.temLuz !== false;
+        let exibirAgua = acc.temAgua !== false;
+
+        let luzCamposHtml = '';
+        if (acc.luzPortal) luzCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.luzPortal}" target="_blank" class="text-xs text-blue-400 hover:underline">Energia - ${acc.luzPortal}</a></div>`;
+        if (acc.luzLogin) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.luzSenha) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+        let aguaCamposHtml = '';
+        if (acc.aguaPortal) aguaCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.aguaPortal}" target="_blank" class="text-xs text-blue-400 hover:underline">Água - ${acc.aguaPortal}</a></div>`;
+        if (acc.aguaCpf) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.aguaMatricula) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.aguaSenha) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+        let botoesAcaoItem = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
         html += `
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex justify-between items-start">
-                    <h3 class="text-lg font-bold text-white flex items-center">
-                        <i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}
-                    </h3>
-                    <span onclick="apagarAcesso(${acc.id})" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></span>
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${acc.morada || 'Morada não informada'}</p>
+                    </div>
+                    ${botoesAcaoItem}
                 </div>
-                <p class="text-xs text-slate-400">${acc.morada || 'Morada não informada'}</p>
-                <div class="border-t border-slate-800 pt-3 space-y-2 text-xs text-slate-300">
-                    ${acc.temLuz ? `<p>⚡ <strong>Luz:</strong> <a href="${acc.luzPortal}" target="_blank" class="text-blue-400 underline">Portal</a> | Login: ${acc.luzLogin}</p>` : ''}
-                    ${acc.temAgua ? `<p>💧 <strong>Água:</strong> <a href="${acc.aguaPortal}" target="_blank" class="text-blue-400 underline">Portal</a> | Matrícula: ${acc.aguaMatricula}</p>` : ''}
-                </div>
+                ${exibirLuz && luzCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-amber-400 uppercase">Energia / Luz</span><div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${luzCamposHtml}</div></div>` : ''}
+                ${exibirAgua && aguaCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-cyan-400 uppercase">Água / Saneamento</span><div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">${aguaCamposHtml}</div></div>` : ''}
             </div>
         `;
     });
@@ -589,19 +831,47 @@ function renderContasCasa() {
 
 function renderAcessos() {
     const container = document.getElementById('grid-acessos');
+    const btnAddSenhas = document.getElementById('btn-add-senhas');
     if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddSenhas) {
+        if (isVipLogado) btnAddSenhas.classList.remove('hidden');
+        else btnAddSenhas.classList.add('hidden');
+    }
+
     let html = '';
     acessosList.forEach(acc => {
+        let exibirLuz = acc.temLuz !== false;
+        let exibirAgua = acc.temAgua !== false;
+
+        let luzCamposHtml = '';
+        if (acc.luzLogin) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.luzSenha) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+        let aguaCamposHtml = '';
+        if (acc.aguaCpf) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.aguaMatricula) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        if (acc.aguaSenha) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+        let botoesAcaoItem = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
         html += `
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                <h3 class="text-lg font-bold text-white flex items-center">
-                    <i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${acc.nome}
-                </h3>
-                <p class="text-xs text-slate-400">${acc.morada || ''}</p>
-                <div class="border-t border-slate-800 pt-3 space-y-1.5 text-xs text-slate-300">
-                    <p><strong>Luz - Senha:</strong> ${acc.luzSenha || 'N/A'}</p>
-                    <p><strong>Água - Senha:</strong> ${acc.aguaSenha || 'N/A'}</p>
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${acc.nome}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${acc.morada || ''}</p>
+                    </div>
+                    ${botoesAcaoItem}
                 </div>
+                ${exibirLuz && luzCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-amber-400 uppercase">Energia / Luz</span><div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${luzCamposHtml}</div></div>` : ''}
+                ${exibirAgua && aguaCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-cyan-400 uppercase">Água / Saneamento</span><div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">${aguaCamposHtml}</div></div>` : ''}
             </div>
         `;
     });
@@ -611,120 +881,329 @@ function renderAcessos() {
 function renderSenhasPessoais() {
     const container = document.getElementById('grid-senhas-pessoais');
     if (!container) return;
+
     if (!adminLogadoAtual) {
-        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Efetue login na aba Administrador para ver as suas senhas pessoais.</p></div>`;
+        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Faça login com a sua conta para ver as suas senhas pessoais.</p></div>`;
         return;
     }
-    if (senhasPessoaisList.length === 0) {
-        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Nenhuma credencial pessoal cadastrada.</p></div>`;
-        return;
-    }
-    let html = '';
-    senhasPessoaisList.forEach(p => {
-        html += `
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
-                <h3 class="text-lg font-bold text-white">${p.servico}</h3>
-                <p class="text-xs text-slate-400">Login: ${p.login}</p>
-                <p class="text-xs text-purple-400">Senha: ${p.senha}</p>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
 
-function renderAdmins() {
-    const container = document.getElementById('lista-admins');
-    if (!container) return;
+    const minhasSenhas = senhasPessoaisList.filter(item => item.userLogin === adminLogadoAtual.login);
+    if (minhasSenhas.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Nenhuma credencial pessoal encontrada.</p></div>`;
+        return;
+    }
+
     let html = '';
-    adminsList.forEach(adm => {
+    minhasSenhas.forEach(item => {
+        let linkHtml = item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center mt-1"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${item.url}</a>` : '';
         html += `
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
-                <div>
-                    <h4 class="text-sm font-bold text-white">${adm.nome}</h4>
-                    <p class="text-xs text-slate-400">Login: ${adm.login}</p>
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-key text-purple-400 mr-2"></i> ${item.servico}</h3>
+                        ${linkHtml}
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="openEditPersonalPassModal(${item.id})" class="text-amber-400 p-2 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deletePersonalPass(${item.id})" class="text-rose-400 p-2 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
-                <span class="text-xs px-2 py-1 bg-blue-500/10 text-blue-400 rounded border border-blue-500/20">Admin</span>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                    <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login: <strong class="text-white">${item.login}</strong></span><button onclick="copiarTexto('${item.login}')" class="text-slate-400 hover:text-purple-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>
+                    <div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${item.senha}</strong></span><button onclick="copiarTexto('${item.senha}')" class="text-slate-400 hover:text-purple-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>
+                </div>
             </div>
         `;
     });
     container.innerHTML = html;
-}
-
-function openAccessModal() {
-    const nome = prompt("Nome da Casa / Imóvel (ex: Casa Nova):");
-    if (!nome) return;
-    const morada = prompt("Morada / Endereço:", "");
-    acessosList.push({
-        id: Date.now(),
-        nome: nome,
-        morada: morada,
-        temLuz: true,
-        luzPortal: "",
-        luzLogin: "",
-        luzSenha: "",
-        temAgua: true,
-        aguaPortal: "",
-        aguaCpf: "",
-        aguaMatricula: "",
-        aguaSenha: ""
-    });
-    salvarNoLocalStorage();
-    renderizarInterfaceCompleta();
-    alert("Imóvel/Conta adicionado com sucesso!");
 }
 
 function openPersonalPassModal() {
     if (!adminLogadoAtual) {
-        alert("Precisa de efetuar login como Administrador primeiro!");
-        solicitarSenhaTab('administrador');
+        alert("Efetue login primeiro.");
+        solicitarSenhaTab('senhas-pessoais');
         return;
     }
-    const servico = prompt("Nome do Serviço / Site:");
-    if (!servico) return;
-    const login = prompt("Login / Utilizador:", "");
-    const senha = prompt("Senha:", "");
-    senhasPessoaisList.push({
-        id: Date.now(),
-        servico,
-        login,
-        senha
-    });
+    document.getElementById('personal-id').value = '';
+    document.getElementById('personal-pass-form').reset();
+    document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal';
+    document.getElementById('personal-pass-modal').classList.remove('hidden');
+}
+
+function closePersonalPassModal() {
+    document.getElementById('personal-pass-modal').classList.add('hidden');
+}
+
+function handlePersonalPassSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual) return;
+
+    const idInput = document.getElementById('personal-id').value;
+    const servico = document.getElementById('pers-servico').value.trim();
+    const url = document.getElementById('pers-url').value.trim();
+    const login = document.getElementById('pers-login').value.trim();
+    const senha = document.getElementById('pers-senha').value.trim();
+
+    if (idInput) {
+        const item = senhasPessoaisList.find(p => p.id == idInput);
+        if (item && item.userLogin === adminLogadoAtual.login) {
+            item.servico = servico;
+            item.url = url;
+            item.login = login;
+            item.senha = senha;
+        }
+    } else {
+        senhasPessoaisList.push({
+            id: Date.now(),
+            userLogin: adminLogadoAtual.login,
+            servico,
+            url,
+            login,
+            senha
+        });
+    }
+
     salvarNoLocalStorage();
+    closePersonalPassModal();
     renderSenhasPessoais();
-    alert("Credencial pessoal salva com sucesso!");
+}
+
+function openEditPersonalPassModal(id) {
+    const item = senhasPessoaisList.find(p => p.id === id);
+    if (!item) return;
+
+    document.getElementById('personal-id').value = item.id;
+    document.getElementById('pers-servico').value = item.servico;
+    document.getElementById('pers-url').value = item.url || '';
+    document.getElementById('pers-login').value = item.login;
+    document.getElementById('pers-senha').value = item.senha;
+    document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Credencial Pessoal';
+    document.getElementById('personal-pass-modal').classList.remove('hidden');
+}
+
+function deletePersonalPass(id) {
+    if (confirm("Deseja realmente remover esta credencial?")) {
+        senhasPessoaisList = senhasPessoaisList.filter(p => p.id !== id);
+        salvarNoLocalStorage();
+        renderSenhasPessoais();
+    }
+}
+
+function renderAdmins() {
+    const container = document.getElementById('lista-admins');
+    const btnAddAdmin = document.getElementById('btn-add-admin-container');
+    if (!container) return;
+
+    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    if (btnAddAdmin) {
+        if (isVipLogado) btnAddAdmin.classList.remove('hidden');
+        else btnAddAdmin.classList.add('hidden');
+    }
+
+    let html = '';
+    adminsList.forEach(adm => {
+        let badgeVip = adm.vip ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md ml-2 uppercase">VIP</span>` : `<span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-md ml-2 uppercase">Normal</span>`;
+        let botoesAcao = isVipLogado ? `
+            <div class="flex items-center space-x-1">
+                <button onclick="openEditAdminModal(${adm.id})" class="text-amber-400 p-2 text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteAdmin(${adm.id})" class="text-rose-400 p-2 text-xs"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        ` : '';
+
+        html += `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
+                <div class="space-y-1">
+                    <h4 class="text-sm font-bold text-white flex items-center"><i class="fa-solid fa-user-shield text-blue-400 mr-2 text-xs"></i> ${adm.nome} ${badgeVip}</h4>
+                    <p class="text-xs text-slate-400">Login: <span class="text-slate-200">${adm.login}</span></p>
+                </div>
+                ${botoesAcao}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
 }
 
 function openAdminModal() {
-    const nome = prompt("Nome do Administrador:");
-    if (!nome) return;
-    const login = prompt("Login de acesso:");
-    const senha = prompt("Senha de acesso:");
-    if (!login || !senha) return;
-    adminsList.push({
-        id: Date.now(),
-        nome,
-        login,
-        senha,
-        vip: true
-    });
-    salvarNoLocalStorage();
-    renderAdmins();
-    alert("Novo administrador cadastrado com sucesso!");
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) {
+        alert("Acesso negado! Apenas administradores VIP.");
+        return;
+    }
+    document.getElementById('admin-modal').classList.remove('hidden');
 }
 
-function apagarAcesso(id) {
-    if (confirm("Deseja realmente apagar este registo?")) {
+function closeAdminModal() {
+    document.getElementById('admin-modal').classList.add('hidden');
+    document.getElementById('admin-form').reset();
+}
+
+function handleAdminSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+    adminsList.push({
+        id: Date.now(),
+        nome: document.getElementById('adm-nome').value,
+        login: document.getElementById('adm-login').value,
+        senha: document.getElementById('adm-senha').value,
+        vip: document.getElementById('adm-vip').checked
+    });
+    salvarNoLocalStorage();
+    closeAdminModal();
+    renderAdmins();
+}
+
+function openEditAdminModal(id) {
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+    const adm = adminsList.find(a => a.id === id);
+    if (!adm) return;
+
+    document.getElementById('edit-adm-id').value = adm.id;
+    document.getElementById('edit-adm-nome').value = adm.nome;
+    document.getElementById('edit-adm-login').value = adm.login;
+    document.getElementById('edit-adm-senha').value = adm.senha;
+    document.getElementById('edit-adm-vip').checked = adm.vip;
+    document.getElementById('edit-admin-modal').classList.remove('hidden');
+}
+
+function closeEditAdminModal() {
+    document.getElementById('edit-admin-modal').classList.add('hidden');
+}
+
+function handleEditAdminSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+    const id = parseInt(document.getElementById('edit-adm-id').value);
+    const adm = adminsList.find(a => a.id === id);
+    if (!adm) return;
+
+    adm.nome = document.getElementById('edit-adm-nome').value;
+    adm.login = document.getElementById('edit-adm-login').value;
+    adm.senha = document.getElementById('edit-adm-senha').value;
+    adm.vip = document.getElementById('edit-adm-vip').checked;
+
+    salvarNoLocalStorage();
+    closeEditAdminModal();
+    renderAdmins();
+}
+
+function deleteAdmin(id) {
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+    if (confirm("Deseja realmente remover este administrador?")) {
+        adminsList = adminsList.filter(a => a.id !== id);
+        salvarNoLocalStorage();
+        renderAdmins();
+    }
+}
+
+function copiarTexto(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert("Copiado para a área de transferência: " + texto);
+    });
+}
+
+function openAccessModal() {
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) {
+        alert("Acesso negado! Apenas administradores VIP.");
+        return;
+    }
+    document.getElementById('access-modal').classList.remove('hidden');
+}
+
+function closeAccessModal() {
+    document.getElementById('access-modal').classList.add('hidden');
+}
+
+function handleAccessSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+    const temLuz = document.getElementById('chk-luz').checked;
+    const temAgua = document.getElementById('chk-agua').checked;
+
+    acessosList.push({
+        id: Date.now(),
+        nome: document.getElementById('acc-nome').value,
+        morada: document.getElementById('acc-morada').value,
+        temLuz,
+        luzPortal: temLuz ? document.getElementById('acc-luz-portal').value : '',
+        luzLogin: temLuz ? document.getElementById('acc-luz-login').value : '',
+        luzSenha: temLuz ? document.getElementById('acc-luz-senha').value : '',
+        temAgua,
+        aguaPortal: temAgua ? document.getElementById('acc-agua-portal').value : '',
+        aguaCpf: temAgua ? document.getElementById('acc-agua-cpf').value : '',
+        aguaMatricula: temAgua ? document.getElementById('acc-agua-mat').value : '',
+        aguaSenha: temAgua ? document.getElementById('acc-agua-senha').value : ''
+    });
+
+    salvarNoLocalStorage();
+    closeAccessModal();
+    renderAcessos();
+    renderContasCasa();
+}
+
+function openEditAccessModal(id) {
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+    const acc = acessosList.find(a => a.id === id);
+    if (!acc) return;
+
+    document.getElementById('edit-acc-id').value = acc.id;
+    document.getElementById('edit-acc-nome').value = acc.nome;
+    document.getElementById('edit-acc-morada').value = acc.morada || '';
+    document.getElementById('edit-acc-luz-portal').value = acc.luzPortal || '';
+    document.getElementById('edit-acc-luz-login').value = acc.luzLogin || '';
+    document.getElementById('edit-acc-luz-senha').value = acc.luzSenha || '';
+    document.getElementById('edit-acc-agua-portal').value = acc.aguaPortal || '';
+    document.getElementById('edit-acc-agua-cpf').value = acc.aguaCpf || '';
+    document.getElementById('edit-acc-agua-mat').value = acc.aguaMatricula || '';
+    document.getElementById('edit-acc-agua-senha').value = acc.aguaSenha || '';
+
+    document.getElementById('edit-access-modal').classList.remove('hidden');
+}
+
+function closeEditAccessModal() {
+    document.getElementById('edit-access-modal').classList.add('hidden');
+}
+
+function handleEditAccessSubmit(event) {
+    event.preventDefault();
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+
+    const id = parseInt(document.getElementById('edit-acc-id').value);
+    const acc = acessosList.find(a => a.id === id);
+    if (!acc) return;
+
+    acc.nome = document.getElementById('edit-acc-nome').value;
+    acc.morada = document.getElementById('edit-acc-morada').value;
+    acc.luzPortal = document.getElementById('edit-acc-luz-portal').value;
+    acc.luzLogin = document.getElementById('edit-acc-luz-login').value;
+    acc.luzSenha = document.getElementById('edit-acc-luz-senha').value;
+    acc.aguaPortal = document.getElementById('edit-acc-agua-portal').value;
+    acc.aguaCpf = document.getElementById('edit-acc-agua-cpf').value;
+    acc.aguaMatricula = document.getElementById('edit-acc-agua-mat').value;
+    acc.aguaSenha = document.getElementById('edit-acc-agua-senha').value;
+
+    salvarNoLocalStorage();
+    closeEditAccessModal();
+    renderAcessos();
+    renderContasCasa();
+}
+
+function deleteAccess(id) {
+    if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
+    if (confirm("Deseja realmente excluir este registo?")) {
         acessosList = acessosList.filter(a => a.id !== id);
         salvarNoLocalStorage();
-        renderizarInterfaceCompleta();
+        renderAcessos();
+        renderContasCasa();
     }
 }
 
 function switchTab(tabId) {
     ['home', 'automacao', 'tv', 'contas', 'senhas', 'senhas-pessoais', 'administrador'].forEach(t => {
-        const el = document.getElementById('tab-' + t);
+        const element = document.getElementById('tab-' + t);
         const btn = document.getElementById('btn-' + t);
-        if (el) el.classList.add('hidden');
+        if (element) element.classList.add('hidden');
         if (btn) {
             btn.classList.remove('active', 'text-white');
             btn.classList.add('bg-slate-900/60', 'text-slate-400');
@@ -743,6 +1222,7 @@ function switchTab(tabId) {
         targetBtn.classList.add('active', 'text-white');
         targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
     }
+
     if (tabId === 'senhas') renderAcessos();
     if (tabId === 'contas') renderContasCasa();
     if (tabId === 'senhas-pessoais') renderSenhasPessoais();
