@@ -1,4 +1,33 @@
-// Normaliza as chaves das temporadas para uma sequência limpa: 1, 2, 3...
+let menuMinimizado = false;
+
+function toggleMinimizarSidebar() {
+    menuMinimizado = !menuMinimizado;
+    const sidebar = document.getElementById('sidebar-principal');
+    const iconeToggle = document.getElementById('icone-toggle-sidebar');
+    const tituloContainer = document.getElementById('sidebar-title-container');
+    const labelMenuNav = document.getElementById('label-menu-nav');
+    const navTextos = document.querySelectorAll('.nav-text');
+    const footerTextos = document.querySelectorAll('.sidebar-footer-text');
+
+    if (menuMinimizado) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-24');
+        iconeToggle.className = "fa-solid fa-angles-right text-xs";
+        if (tituloContainer) tituloContainer.style.display = 'none';
+        if (labelMenuNav) labelMenuNav.style.display = 'none';
+        navTextos.forEach(el => el.style.display = 'none');
+        footerTextos.forEach(el => el.style.display = 'none');
+    } else {
+        sidebar.classList.remove('w-24');
+        sidebar.classList.add('w-80');
+        iconeToggle.className = "fa-solid fa-angles-left text-xs";
+        if (tituloContainer) tituloContainer.style.display = 'block';
+        if (labelMenuNav) labelMenuNav.style.display = 'block';
+        navTextos.forEach(el => el.style.display = 'inline');
+        footerTextos.forEach(el => el.style.display = 'inline');
+    }
+}
+
 function normalizarTemporadasSequenciais(temporadasDados) {
     const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
     const chavesOrdenadas = Object.keys(dados).sort((a, b) => {
@@ -28,8 +57,8 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
         tipoConta: "Energia / Luz",
         nomeSite: "Portal Coopera",
         portal: "https://portal.coopera.com.br/agenciavirtual3",
-        login: "hiamvitorb@gmail.com",
-        senha: "Hiam.235"
+        login: "utilizador@email.com",
+        senha: "Senha.235"
     },
     {
         id: 2,
@@ -40,27 +69,17 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
         portal: "https://e.casan.com.br/",
         cpf: "75442280968",
         matricula: "6706592",
-        senha: "Hiam.235"
+        senha: "Senha.235"
     }
 ];
 
-let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [
-    {
-        id: 1,
-        userLogin: "admin",
-        servico: "GitHub",
-        url: "https://github.com",
-        login: "hiamvitor",
-        senha: "HiamGitHub2026!"
-    }
-];
-
+let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
 let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
 
 if (adminsList.length === 0) {
     adminsList.push({
         id: Date.now(),
-        nome: "Administrador Inicial",
+        nome: "Administrador Principal",
         login: "admin",
         senha: "123",
         vip: true
@@ -98,48 +117,17 @@ function salvarNoLocalStorage() {
 async function carregarDadosDaNuvem() {
     if (window.db && window.dbHelpers) {
         try {
-            const { doc, getDoc, onSnapshot, setDoc } = window.dbHelpers;
+            const { doc, onSnapshot, setDoc } = window.dbHelpers;
             const docRef = doc(window.db, "dados", "principal");
             
-            try {
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const dados = docSnap.data();
-                    if (dados.mediaList) mediaList = dados.mediaList;
-                    if (dados.acessosList) acessosList = dados.acessosList;
-                    if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-                    if (dados.adminsList) {
-                        adminsList = dados.adminsList;
-                        if (adminLogadoAtual) {
-                            const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
-                            if (adminAtualizado) {
-                                adminLogadoAtual = adminAtualizado;
-                            } else {
-                                adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
-                            }
-                        }
-                    }
-                    renderizarInterfaceCompleta();
-                } else {
-                    await setDoc(docRef, {
-                        mediaList: JSON.parse(JSON.stringify(mediaList)),
-                        acessosList: JSON.parse(JSON.stringify(acessosList)),
-                        senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
-                        adminsList: JSON.parse(JSON.stringify(adminsList)),
-                        ultimaAtualizacao: new Date().toISOString()
-                    });
-                }
-            } catch (err) {
-                console.warn("Aviso ao ler documento inicial do Firestore:", err);
-            }
-
-            onSnapshot(docRef, (docSnapSnapshot) => {
+            // O onSnapshot lida com a carga inicial e atualizações em tempo real num novo dispositivo
+            onSnapshot(docRef, async (docSnapSnapshot) => {
                 if (docSnapSnapshot.exists()) {
                     const dados = docSnapSnapshot.data();
                     
-                    mediaList = dados.mediaList || mediaList;
-                    acessosList = dados.acessosList || acessosList;
-                    senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
+                    if (dados.mediaList) mediaList = dados.mediaList;
+                    if (dados.acessosList) acessosList = dados.acessosList;
+                    if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
                     
                     if (dados.adminsList) {
                         adminsList = dados.adminsList;
@@ -153,11 +141,18 @@ async function carregarDadosDaNuvem() {
 
                     renderizarInterfaceCompleta();
                     atualizarTimestampSyncWeb();
+                } else {
+                    await setDoc(docRef, {
+                        mediaList: JSON.parse(JSON.stringify(mediaList)),
+                        acessosList: JSON.parse(JSON.stringify(acessosList)),
+                        senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
+                        adminsList: JSON.parse(JSON.stringify(adminsList)),
+                        ultimaAtualizacao: new Date().toISOString()
+                    });
                 }
             }, (error) => {
                 console.error("Erro no listener onSnapshot do Firebase:", error);
             });
-
         } catch (e) {
             console.error("Erro ao carregar dados do Firebase:", e);
         }
@@ -205,13 +200,16 @@ function forcarAtualizacaoGeralDispositivos() {
 
 document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
-    
+    renderizarInterfaceCompleta();
+    atualizarTimestampSyncWeb();
+
     window.addEventListener('firebase-ready', () => {
         carregarDadosDaNuvem();
     });
 
-    renderizarInterfaceCompleta();
-    atualizarTimestampSyncWeb();
+    if (window.db && window.dbHelpers) {
+        carregarDadosDaNuvem();
+    }
 });
 
 function solicitarSenhaTab(tabId) {
@@ -272,7 +270,19 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     const nomeInput = document.getElementById('input-nome').value.trim();
     const tipo = document.getElementById('input-tipo').value;
-    
+    const btnSubmit = document.getElementById('btn-submit-media');
+    const progressContainer = document.getElementById('loading-progress-container');
+    const progressFill = document.getElementById('loading-bar-fill');
+    const progressPercent = document.getElementById('loading-percent-text');
+    const statusText = document.getElementById('loading-status-text');
+
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+    progressContainer.classList.remove('hidden');
+    progressFill.style.width = '20%';
+    progressPercent.innerText = '20%';
+    statusText.innerText = 'A ligar à API oficial...';
+
     let dadosMidia = {
         genero: tipo === 'Filme' ? "Filme / Ação" : (tipo === 'Anime' ? "Anime / Ação / Aventura" : "Ação / Aventura / Fantasia"),
         resumo: `Informações detalhadas sobre ${nomeInput} obtidas do catálogo oficial.`,
@@ -288,6 +298,10 @@ async function handleFormSubmit(event) {
     };
 
     try {
+        progressFill.style.width = '50%';
+        progressPercent.innerText = '50%';
+        statusText.innerText = 'A obter episódios e resumos...';
+
         const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
         if (response.ok) {
             const show = await response.json();
@@ -303,6 +317,10 @@ async function handleFormSubmit(event) {
             dadosMidia.lancamento = show.premiered || "2024-01-01";
             dadosMidia.termino = show.ended || "Em andamento";
             if (show.image && show.image.original) dadosMidia.poster = show.image.original;
+
+            progressFill.style.width = '80%';
+            progressPercent.innerText = '80%';
+            statusText.innerText = 'A traduzir conteúdos para português...';
 
             if (show._embedded && Array.isArray(show._embedded.episodes)) {
                 const temporadasMap = {};
@@ -324,6 +342,10 @@ async function handleFormSubmit(event) {
         console.error("Erro API:", e);
     }
 
+    progressFill.style.width = '100%';
+    progressPercent.innerText = '100%';
+    statusText.innerText = 'Concluído com sucesso!';
+
     mediaList.push({
         id: Date.now(),
         nome: nomeInput,
@@ -338,12 +360,18 @@ async function handleFormSubmit(event) {
         avaliacao: 0
     });
 
-    salvarNoLocalStorage();
-    closeModal();
+    setTimeout(() => {
+        salvarNoLocalStorage();
+        closeModal();
+        progressContainer.classList.add('hidden');
+        progressFill.style.width = '0%';
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
 
-    if (tipo === 'Filme') switchSubPage('filmes');
-    else if (tipo === 'Série') switchSubPage('series');
-    else if (tipo === 'Anime') switchSubPage('animes');
+        if (tipo === 'Filme') switchSubPage('filmes');
+        else if (tipo === 'Série') switchSubPage('series');
+        else if (tipo === 'Anime') switchSubPage('animes');
+    }, 400);
 }
 
 async function recarregarInformacoesTitulo() {
