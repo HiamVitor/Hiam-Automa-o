@@ -12,7 +12,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_TOKEN }}'
           channelId: live
         env:
+          FIREBASE_TOKEN: '${{ secrets.FIREBASE_TOKEN }}'
           FIREBASE_CLI_EXPERIMENTS: webframeworks
