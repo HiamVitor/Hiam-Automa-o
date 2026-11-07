@@ -464,7 +464,7 @@
                     </select>
                 </div>
 
-                <!-- Barra de Progresso de Carregamento (Oculta por defeito) -->
+                <!-- Barra de Progresso de Carregamento -->
                 <div id="loading-progress-container" class="hidden space-y-2 pt-2">
                     <div class="flex justify-between text-xs text-blue-400 font-medium">
                         <span id="loading-status-text">A consultar catálogo e a traduzir...</span>
@@ -485,7 +485,7 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITAR TÍTULO, INFORMAÇÕES E EPISÓDIOS -->
+    <!-- MODAL: EDITAR TÍTULO -->
     <div id="edit-item-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl space-y-6 my-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -541,7 +541,7 @@
                     
                     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
                         <p class="text-[11px] text-slate-400">
-                            Pode copiar as colunas diretamente de uma tabela (ex: Temporada | Episódio | Título) e colar no campo abaixo:
+                            Pode copiar as colunas diretamente de uma tabela e colar no campo abaixo:
                         </p>
                         <textarea id="manual-textarea-massa" rows="4" placeholder="Cole aqui os dados copiados da tabela..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-blue-500"></textarea>
                         
@@ -567,7 +567,7 @@
         </div>
     </div>
 
-    <!-- MODAL ADICIONAR ACESSO (GERAL) -->
+    <!-- MODAL ADICIONAR ACESSO -->
     <div id="access-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
@@ -582,7 +582,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
-                    <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos - Morro Estevão" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
@@ -667,7 +667,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
-                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
@@ -714,7 +714,7 @@
                 <input type="hidden" id="personal-id">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Serviço / Site / App</label>
-                    <input type="text" id="pers-servico" required placeholder="Ex: GitHub, Banco, E-mail..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                    <input type="text" id="pers-servico" required placeholder="Ex: GitHub, Banco..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">URL (Link Opcional)</label>
@@ -843,5 +843,8 @@
             </form>
         </div>
     </div>
+
+    <!-- SCRIPT PRINCIPAL QUE FAZ FUNCIONAR OS BOTÕES E EVENTOS -->
+    <script src="script.js"></script>
 </body>
 </html>
