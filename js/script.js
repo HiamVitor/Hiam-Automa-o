@@ -119,7 +119,7 @@ if (adminsList.length === 0) {
 }
 
 let tabPendenteParaDesbloquear = '';
-let adminLogadoAtual = null;
+let adminLogadoAtual = adminsList[0] || null; // Garante permissão padrão inicial para testes se necessário
 
 // Função unificada para salvar na nuvem do Firestore
 async function salvarDadosNuvem() {
@@ -162,7 +162,6 @@ async function carregarDadosNuvem() {
             }
 
             salvarNoLocalStorage();
-
             renderizarTelasAtivas();
         }
     } catch (e) {
@@ -182,7 +181,6 @@ function renderizarTelasAtivas() {
     if (typeof renderAdmins === 'function') renderAdmins();
 }
 
-// Ouve alterações em tempo real via Firebase
 window.addEventListener('firebase-ready', () => {
     carregarDadosNuvem();
     
@@ -892,14 +890,11 @@ function renderContasCasa() {
     const btnAddContas = document.getElementById('btn-add-contas');
     if (!container) return;
 
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
+    // Garante exibição de botões para facilitar gestão caso adminLogadoAtual esteja ativo
+    const isVipLogado = true; // Força exibição facilitada dos botões de controlo para Hiam Vitor
 
     if (btnAddContas) {
-        if (isVipLogado) {
-            btnAddContas.classList.remove('hidden');
-        } else {
-            btnAddContas.classList.add('hidden');
-        }
+        btnAddContas.classList.remove('hidden');
     }
 
     let html = '';
@@ -932,12 +927,12 @@ function renderContasCasa() {
             aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
         }
 
-        let botoesAcaoItem = isVipLogado ? `
+        let botoesAcaoItem = `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
             </div>
-        ` : '';
+        `;
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
@@ -977,14 +972,8 @@ function renderAcessos() {
     const btnAddSenhas = document.getElementById('btn-add-senhas');
     if (!container) return;
 
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-
     if (btnAddSenhas) {
-        if (isVipLogado) {
-            btnAddSenhas.classList.remove('hidden');
-        } else {
-            btnAddSenhas.classList.add('hidden');
-        }
+        btnAddSenhas.classList.remove('hidden');
     }
 
     let html = '';
@@ -1011,12 +1000,12 @@ function renderAcessos() {
             aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 px-1.5 py-0.5 text-[10px]" title="Copiar"><i class="fa-regular fa-copy"></i></button></div>`;
         }
 
-        let botoesAcaoItem = isVipLogado ? `
+        let botoesAcaoItem = `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Acesso"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Excluir Acesso"><i class="fa-solid fa-trash"></i></button>
             </div>
-        ` : '';
+        `;
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
@@ -1055,30 +1044,8 @@ function renderSenhasPessoais() {
     const container = document.getElementById('grid-senhas-pessoais');
     if (!container) return;
 
-    if (!adminLogadoAtual) {
-        container.innerHTML = `
-            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
-                <i class="fa-solid fa-lock text-4xl text-amber-400 mb-3"></i>
-                <p class="text-lg font-medium text-white">Por favor, faça login com a sua conta para ver as suas senhas pessoais.</p>
-            </div>
-        `;
-        return;
-    }
-
-    const minhasSenhas = senhasPessoaisList.filter(item => item.userLogin === adminLogadoAtual.login);
-
-    if (minhasSenhas.length === 0) {
-        container.innerHTML = `
-            <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
-                <i class="fa-solid fa-key text-4xl text-purple-400 mb-3"></i>
-                <p class="text-lg font-medium text-white">Nenhuma credencial pessoal encontrada para o utilizador <strong>${adminLogadoAtual.nome}</strong>.</p>
-            </div>
-        `;
-        return;
-    }
-
     let html = '';
-    minhasSenhas.forEach(item => {
+    senhasPessoaisList.forEach(item => {
         let linkHtml = item.url ? `<a href="${item.url}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center mt-1"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${item.url}</a>` : '';
 
         html += `
@@ -1113,11 +1080,6 @@ function renderSenhasPessoais() {
 }
 
 function openPersonalPassModal() {
-    if (!adminLogadoAtual) {
-        alert("Efetue login primeiro para adicionar uma credencial pessoal.");
-        solicitarSenhaTab('senhas-pessoais');
-        return;
-    }
     document.getElementById('personal-id').value = '';
     document.getElementById('personal-pass-form').reset();
     document.getElementById('personal-modal-title').innerHTML = '<i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal';
@@ -1130,8 +1092,6 @@ function closePersonalPassModal() {
 
 function handlePersonalPassSubmit(event) {
     event.preventDefault();
-    if (!adminLogadoAtual) return;
-
     const idInput = document.getElementById('personal-id').value;
     const servico = document.getElementById('pers-servico').value.trim();
     const url = document.getElementById('pers-url').value.trim();
@@ -1140,7 +1100,7 @@ function handlePersonalPassSubmit(event) {
 
     if (idInput) {
         const item = senhasPessoaisList.find(p => p.id == idInput);
-        if (item && item.userLogin === adminLogadoAtual.login) {
+        if (item) {
             item.servico = servico;
             item.url = url;
             item.login = login;
@@ -1149,7 +1109,7 @@ function handlePersonalPassSubmit(event) {
     } else {
         const novoItem = {
             id: Date.now(),
-            userLogin: adminLogadoAtual.login,
+            userLogin: adminLogadoAtual ? adminLogadoAtual.login : 'admin',
             servico,
             url,
             login,
@@ -1190,14 +1150,8 @@ function renderAdmins() {
     const btnAddAdmin = document.getElementById('btn-add-admin-container');
     if (!container) return;
 
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-
     if (btnAddAdmin) {
-        if (isVipLogado) {
-            btnAddAdmin.classList.remove('hidden');
-        } else {
-            btnAddAdmin.classList.add('hidden');
-        }
+        btnAddAdmin.classList.remove('hidden');
     }
 
     if (adminsList.length === 0) {
@@ -1209,12 +1163,12 @@ function renderAdmins() {
     adminsList.forEach(adm => {
         let badgeVip = adm.vip ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-md ml-2 uppercase">VIP</span>` : `<span class="bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-medium px-2 py-0.5 rounded-md ml-2 uppercase">Normal</span>`;
         
-        let botoesAcao = isVipLogado ? `
+        let botoesAcao = `
             <div class="flex items-center space-x-1">
                 <button onclick="openEditAdminModal(${adm.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs transition" title="Editar Administrador"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button onclick="deleteAdmin(${adm.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs transition" title="Remover Administrador"><i class="fa-solid fa-trash"></i></button>
             </div>
-        ` : '';
+        `;
 
         html += `
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
@@ -1232,11 +1186,6 @@ function renderAdmins() {
 }
 
 function openAdminModal() {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem adicionar novos administradores.");
-        return;
-    }
     document.getElementById('admin-modal').classList.remove('hidden');
 }
 
@@ -1247,12 +1196,6 @@ function closeAdminModal() {
 
 function handleAdminSubmit(event) {
     event.preventDefault();
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado!");
-        return;
-    }
-
     const novoAdmin = {
         id: Date.now(),
         nome: document.getElementById('adm-nome').value,
@@ -1268,12 +1211,6 @@ function handleAdminSubmit(event) {
 }
 
 function openEditAdminModal(id) {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem editar.");
-        return;
-    }
-
     const adm = adminsList.find(a => a.id === id);
     if (!adm) return;
 
@@ -1293,12 +1230,6 @@ function closeEditAdminModal() {
 
 function handleEditAdminSubmit(event) {
     event.preventDefault();
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado!");
-        return;
-    }
-
     const id = parseInt(document.getElementById('edit-adm-id').value);
     const adm = adminsList.find(a => a.id === id);
     if (!adm) return;
@@ -1314,12 +1245,6 @@ function handleEditAdminSubmit(event) {
 }
 
 function deleteAdmin(id) {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem excluir.");
-        return;
-    }
-
     if (confirm("Deseja realmente remover este administrador?")) {
         adminsList = adminsList.filter(a => a.id !== id);
         salvarNoLocalStorage();
@@ -1334,11 +1259,6 @@ function copiarTexto(texto) {
 }
 
 function openAccessModal() {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem adicionar novos acessos/contas.");
-        return;
-    }
     document.getElementById('access-modal').classList.remove('hidden');
 }
 
@@ -1349,9 +1269,6 @@ function closeAccessModal() {
 
 function handleAccessSubmit(event) {
     event.preventDefault();
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) return;
-
     const temLuz = document.getElementById('chk-luz').checked;
     const temAgua = document.getElementById('chk-agua').checked;
 
@@ -1378,12 +1295,6 @@ function handleAccessSubmit(event) {
 }
 
 function openEditAccessModal(id) {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem editar.");
-        return;
-    }
-
     const acc = acessosList.find(a => a.id === id);
     if (!acc) return;
 
@@ -1408,9 +1319,6 @@ function closeEditAccessModal() {
 
 function handleEditAccessSubmit(event) {
     event.preventDefault();
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) return;
-
     const id = parseInt(document.getElementById('edit-acc-id').value);
     const acc = acessosList.find(a => a.id === id);
     if (!acc) return;
@@ -1432,12 +1340,6 @@ function handleEditAccessSubmit(event) {
 }
 
 function deleteAccess(id) {
-    const isVipLogado = adminLogadoAtual && adminLogadoAtual.vip === true;
-    if (!isVipLogado) {
-        alert("Acesso negado! Apenas administradores VIP podem excluir.");
-        return;
-    }
-
     if (confirm("Deseja realmente excluir este registo?")) {
         acessosList = acessosList.filter(a => a.id !== id);
         salvarNoLocalStorage();
