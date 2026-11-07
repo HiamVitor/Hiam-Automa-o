@@ -158,7 +158,6 @@ async function carregarDadosDaNuvem() {
                         }
                     }
 
-                    // CORREÇÃO: Atualiza o localStorage ao receber os dados da nuvem (essencial para novos dispositivos)
                     localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
                     localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
                     localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
@@ -1372,6 +1371,7 @@ function deleteAccess(id) {
 }
 
 function switchTab(tabId) {
+    // Lista completa de todas as abas principais
     ['home', 'automacao', 'tv', 'contas', 'senhas', 'senhas-pessoais', 'administrador'].forEach(t => {
         const element = document.getElementById('tab-' + t);
         const btn = document.getElementById('btn-' + t);
@@ -1382,6 +1382,7 @@ function switchTab(tabId) {
         }
     });
 
+    // Oculta também subpáginas de mídia caso estivessem abertas
     ['filmes', 'series', 'animes', 'detalhes'].forEach(sub => {
         const subEl = document.getElementById('subpage-' + sub);
         if (subEl) subEl.classList.add('hidden');
@@ -1389,12 +1390,14 @@ function switchTab(tabId) {
 
     const targetTab = document.getElementById('tab-' + tabId);
     const targetBtn = document.getElementById('btn-' + tabId);
+    
     if (targetTab) targetTab.classList.remove('hidden');
     if (targetBtn) {
         targetBtn.classList.add('active', 'text-white');
         targetBtn.classList.remove('bg-slate-900/60', 'text-slate-400');
     }
 
+    // Renderização específica para cada aba
     if (tabId === 'senhas') renderAcessos();
     if (tabId === 'contas') renderContasCasa();
     if (tabId === 'senhas-pessoais') renderSenhasPessoais();
