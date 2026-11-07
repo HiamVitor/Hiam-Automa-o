@@ -219,12 +219,29 @@ function salvarNoLocalStorage() {
     salvarDadosNuvem();
 }
 
+// Inicialização imediata caso o Firebase já esteja pronto
+setTimeout(() => {
+    if (typeof carregarDadosNuvem === 'function') {
+        carregarDadosNuvem();
+    }
+}, 300);
+
 document.addEventListener('DOMContentLoaded', () => {
     switchTab('home');
-    renderAcessos();
-    renderContasCasa();
-    renderSenhasPessoais();
-    renderAdmins();
+    
+    if (typeof carregarDadosNuvem === 'function' && window.db) {
+        carregarDadosNuvem().then(() => {
+            renderAcessos();
+            renderContasCasa();
+            renderSenhasPessoais();
+            renderAdmins();
+        });
+    } else {
+        renderAcessos();
+        renderContasCasa();
+        renderSenhasPessoais();
+        renderAdmins();
+    }
 });
 
 function solicitarSenhaTab(tabId) {
