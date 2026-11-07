@@ -1,3 +1,33 @@
+let menuMinimizado = false;
+
+function toggleMinimizarSidebar() {
+    menuMinimizado = !menuMinimizado;
+    const sidebar = document.getElementById('sidebar-principal');
+    const iconeToggle = document.getElementById('icone-toggle-sidebar');
+    const tituloContainer = document.getElementById('sidebar-title-container');
+    const labelMenuNav = document.getElementById('label-menu-nav');
+    const navTextos = document.querySelectorAll('.nav-text');
+    const footerTextos = document.querySelectorAll('.sidebar-footer-text');
+
+    if (menuMinimizado) {
+        sidebar.classList.remove('w-80');
+        sidebar.classList.add('w-24');
+        iconeToggle.className = "fa-solid fa-angles-right text-xs";
+        if (tituloContainer) tituloContainer.style.display = 'none';
+        if (labelMenuNav) labelMenuNav.style.display = 'none';
+        navTextos.forEach(el => el.style.display = 'none');
+        footerTextos.forEach(el => el.style.display = 'none');
+    } else {
+        sidebar.classList.remove('w-24');
+        sidebar.classList.add('w-80');
+        iconeToggle.className = "fa-solid fa-angles-left text-xs";
+        if (tituloContainer) tituloContainer.style.display = 'block';
+        if (labelMenuNav) labelMenuNav.style.display = 'block';
+        navTextos.forEach(el => el.style.display = 'inline');
+        footerTextos.forEach(el => el.style.display = 'inline');
+    }
+}
+
 // Normaliza as chaves das temporadas para uma sequência limpa: 1, 2, 3...
 function normalizarTemporadasSequenciais(temporadasDados) {
     const dados = temporadasDados && typeof temporadasDados === 'object' ? temporadasDados : {};
@@ -25,91 +55,32 @@ let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
         id: 1,
         nome: "Casa Principal - 235",
         morada: "Rua Dos Crisântemos - Morro Estevão",
-        temLuz: true,
-        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
-        luzLogin: "hiamvitorb@gmail.com",
-        luzSenha: "Hiam.235",
-        temAgua: true,
-        aguaPortal: "https://e.casan.com.br/",
-        aguaCpf: "75442280968",
-        aguaMatricula: "6706592",
-        aguaSenha: "Hiam.235"
+        tipoConta: "Energia / Luz",
+        nomeSite: "Portal Coopera",
+        portal: "https://portal.coopera.com.br/agenciavirtual3",
+        login: "hiamvitorb@gmail.com",
+        senha: "Hiam.235"
     },
     {
         id: 2,
-        nome: "Casa Velha",
+        nome: "Casa Principal - 235",
         morada: "Rua Dos Crisântemos - Morro Estevão",
-        temLuz: true,
-        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
-        luzLogin: "2847",
-        luzSenha: "25172517",
-        temAgua: true,
-        aguaPortal: "https://e.casan.com.br/",
-        aguaCpf: "83396861949",
-        aguaMatricula: "06175678",
-        aguaSenha: ""
-    },
-    {
-        id: 3,
-        nome: "Casa Verde - 366",
-        morada: "Rua Etelvina de Oliveira Muniz - Morro Estevão",
-        temLuz: true,
-        luzPortal: "https://portal.coopera.com.br/agenciavirtual3",
-        luzLogin: "hiamvitorb@gmail.com",
-        luzSenha: "Hiam.235",
-        temAgua: true,
-        aguaPortal: "https://e.casan.com.br/",
-        aguaCpf: "75442280968",
-        aguaMatricula: "6706592",
-        aguaSenha: "Hiam.235"
-    },
-    {
-        id: 4,
-        nome: "Casa da Praia - 153",
-        morada: "Rincão Zona Norte",
-        temLuz: true,
-        luzPortal: "https://agencia.cooperalianca.com.br/AgenciaVirtual/",
-        luzLogin: "UC: 12415",
-        luzSenha: "25172517",
-        temAgua: true,
-        aguaPortal: "https://samaerincao.com.br/",
-        aguaCpf: "619.481.289-34",
-        aguaMatricula: "521071",
-        aguaSenha: ""
-    },
-    {
-        id: 5,
-        nome: "Casa Nova",
-        morada: "",
-        temLuz: true,
-        luzPortal: "",
-        luzLogin: "",
-        luzSenha: "",
-        temAgua: true,
-        aguaPortal: "",
-        aguaCpf: "",
-        aguaMatricula: "",
-        aguaSenha: ""
+        tipoConta: "Água / Saneamento",
+        nomeSite: "Casan",
+        portal: "https://e.casan.com.br/",
+        cpf: "75442280968",
+        matricula: "6706592",
+        senha: "Hiam.235"
     }
 ];
 
-let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [
-    {
-        id: 1,
-        userLogin: "admin",
-        servico: "GitHub",
-        url: "https://github.com",
-        login: "hiamvitor",
-        senha: "HiamGitHub2026!"
-    }
-];
-
+let senhasPessoaisList = JSON.parse(localStorage.getItem('hiam_senhasPessoaisList')) || [];
 let adminsList = JSON.parse(localStorage.getItem('hiam_adminsList')) || [];
 
 if (adminsList.length === 0) {
     adminsList.push({
         id: Date.now(),
-        nome: "Administrador Inicial",
+        nome: "Hiam Vitor Biff de Souza",
         login: "admin",
         senha: "123",
         vip: true
@@ -206,11 +177,15 @@ function renderizarInterfaceCompleta() {
     renderContasCasa();
     renderSenhasPessoais();
     renderAdmins();
-    if (!document.getElementById('subpage-detalhes').classList.contains('hidden')) {
+    const subpageDetalhes = document.getElementById('subpage-detalhes');
+    if (subpageDetalhes && !subpageDetalhes.classList.contains('hidden')) {
         renderizarConteudoDetalhes();
     }
-    if (currentActiveCategory && !document.getElementById('subpage-' + currentActiveCategory).classList.contains('hidden')) {
-        renderMediaList(currentActiveCategory);
+    if (currentActiveCategory) {
+        const subpageCat = document.getElementById('subpage-' + currentActiveCategory);
+        if (subpageCat && !subpageCat.classList.contains('hidden')) {
+            renderMediaList(currentActiveCategory);
+        }
     }
 }
 
@@ -280,15 +255,6 @@ function verificarLoginSenhaTab(event) {
     }
 }
 
-function toggleSecaoForm(secao) {
-    const chk = document.getElementById(`chk-${secao}`);
-    const container = document.getElementById(`container-campos-${secao}`);
-    if (chk && container) {
-        if (chk.checked) container.classList.remove('hidden');
-        else container.classList.add('hidden');
-    }
-}
-
 async function traduzirParaPortugues(texto) {
     if (!texto || typeof texto !== 'string' || texto.trim() === "") return texto;
     try {
@@ -314,7 +280,21 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     const nomeInput = document.getElementById('input-nome').value.trim();
     const tipo = document.getElementById('input-tipo').value;
-    
+    const btnSubmit = document.getElementById('btn-submit-media');
+    const progressContainer = document.getElementById('loading-progress-container');
+    const progressFill = document.getElementById('loading-bar-fill');
+    const progressPercent = document.getElementById('loading-percent-text');
+    const statusText = document.getElementById('loading-status-text');
+
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    if (progressContainer) progressContainer.classList.remove('hidden');
+    if (progressFill) progressFill.style.width = '20%';
+    if (progressPercent) progressPercent.innerText = '20%';
+    if (statusText) statusText.innerText = 'A ligar à API oficial...';
+
     let dadosMidia = {
         genero: tipo === 'Filme' ? "Filme / Ação" : (tipo === 'Anime' ? "Anime / Ação / Aventura" : "Ação / Aventura / Fantasia"),
         resumo: `Informações detalhadas sobre ${nomeInput} obtidas do catálogo oficial.`,
@@ -330,6 +310,10 @@ async function handleFormSubmit(event) {
     };
 
     try {
+        if (progressFill) progressFill.style.width = '50%';
+        if (progressPercent) progressPercent.innerText = '50%';
+        if (statusText) statusText.innerText = 'A obter episódios e resumos...';
+
         const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
         if (response.ok) {
             const show = await response.json();
@@ -345,6 +329,10 @@ async function handleFormSubmit(event) {
             dadosMidia.lancamento = show.premiered || "2024-01-01";
             dadosMidia.termino = show.ended || "Em andamento";
             if (show.image && show.image.original) dadosMidia.poster = show.image.original;
+
+            if (progressFill) progressFill.style.width = '80%';
+            if (progressPercent) progressPercent.innerText = '80%';
+            if (statusText) statusText.innerText = 'A traduzir conteúdos para português...';
 
             if (show._embedded && Array.isArray(show._embedded.episodes)) {
                 const temporadasMap = {};
@@ -366,6 +354,10 @@ async function handleFormSubmit(event) {
         console.error("Erro API:", e);
     }
 
+    if (progressFill) progressFill.style.width = '100%';
+    if (progressPercent) progressPercent.innerText = '100%';
+    if (statusText) statusText.innerText = 'Concluído com sucesso!';
+
     mediaList.push({
         id: Date.now(),
         nome: nomeInput,
@@ -380,12 +372,20 @@ async function handleFormSubmit(event) {
         avaliacao: 0
     });
 
-    salvarNoLocalStorage();
-    closeModal();
+    setTimeout(() => {
+        salvarNoLocalStorage();
+        closeModal();
+        if (progressContainer) progressContainer.classList.add('hidden');
+        if (progressFill) progressFill.style.width = '0%';
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
 
-    if (tipo === 'Filme') switchSubPage('filmes');
-    else if (tipo === 'Série') switchSubPage('series');
-    else if (tipo === 'Anime') switchSubPage('animes');
+        if (tipo === 'Filme') switchSubPage('filmes');
+        else if (tipo === 'Série') switchSubPage('series');
+        else if (tipo === 'Anime') switchSubPage('animes');
+    }, 400);
 }
 
 async function recarregarInformacoesTitulo() {
@@ -777,22 +777,6 @@ function deleteItem(id, category) {
     switchSubPage(category);
 }
 
-function removerPorCategoria(tipoCategoria) {
-    if (confirm(`Deseja realmente remover todos os itens de ${tipoCategoria}?`)) {
-        mediaList = mediaList.filter(item => item.tipo !== tipoCategoria);
-        salvarNoLocalStorage();
-        renderMediaList(tipoCategoria === 'Filme' ? 'filmes' : (tipoCategoria === 'Série' ? 'series' : 'animes'));
-    }
-}
-
-function removerTodosTitulos() {
-    if (confirm("Deseja realmente remover TODOS os títulos?")) {
-        mediaList = [];
-        salvarNoLocalStorage();
-        switchSubPage('main');
-    }
-}
-
 function renderContasCasa() {
     const container = document.getElementById('grid-contas-casa');
     const btnAddContas = document.getElementById('btn-add-contas');
@@ -804,43 +788,75 @@ function renderContasCasa() {
         else btnAddContas.classList.add('hidden');
     }
 
-    let html = '';
+    const gruposPorCasa = {};
     acessosList.forEach(acc => {
-        let exibirLuz = acc.temLuz !== false;
-        let exibirAgua = acc.temAgua !== false;
+        const nomeCasa = acc.nome || "Outra Propriedade";
+        if (!gruposPorCasa[nomeCasa]) {
+            gruposPorCasa[nomeCasa] = {
+                morada: acc.morada || '',
+                contas: []
+            };
+        }
+        if (acc.morada && !gruposPorCasa[nomeCasa].morada) {
+            gruposPorCasa[nomeCasa].morada = acc.morada;
+        }
+        gruposPorCasa[nomeCasa].contas.push(acc);
+    });
 
-        let luzCamposHtml = '';
-        if (acc.luzPortal) luzCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.luzPortal}" target="_blank" class="text-xs text-blue-400 hover:underline">Energia - ${acc.luzPortal}</a></div>`;
-        if (acc.luzLogin) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.luzSenha) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+    let html = '';
+    for (let nomeCasa in gruposPorCasa) {
+        const grupo = gruposPorCasa[nomeCasa];
+        let subContasHtml = '';
 
-        let aguaCamposHtml = '';
-        if (acc.aguaPortal) aguaCamposHtml += `<div class="col-span-full mb-1"><a href="${acc.aguaPortal}" target="_blank" class="text-xs text-blue-400 hover:underline">Água - ${acc.aguaPortal}</a></div>`;
-        if (acc.aguaCpf) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.aguaMatricula) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.aguaSenha) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        grupo.contas.forEach(acc => {
+            let nomeSiteFormatado = acc.nomeSite || "Portal Oficial";
+            if (acc.portal) {
+                if (acc.portal.includes("coopera")) nomeSiteFormatado = "Portal Coopera";
+                else if (acc.portal.includes("cooperalianca")) nomeSiteFormatado = "Portal Cooperaliança";
+                else if (acc.portal.includes("casan")) nomeSiteFormatado = "Casan";
+                else if (acc.portal.includes("samaerincao")) nomeSiteFormatado = "Samae Rincão";
+            }
 
-        let botoesAcaoItem = isVipLogado ? `
-            <div class="flex items-center space-x-1">
-                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        ` : '';
+            let camposDinamicosHtml = '';
+            if (acc.portal) {
+                camposDinamicosHtml += `<div class="col-span-full mb-1"><a href="${acc.portal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${acc.tipoConta || 'Serviço'} - ${nomeSiteFormatado}</a></div>`;
+            }
+            if (acc.login) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login / UC / Email: <strong class="text-white">${acc.login}</strong></span><button onclick="copiarTexto('${acc.login}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.cpf) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.cpf}</strong></span><button onclick="copiarTexto('${acc.cpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.matricula) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.matricula}</strong></span><button onclick="copiarTexto('${acc.matricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.senha) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.senha}</strong></span><button onclick="copiarTexto('${acc.senha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+            let botoesAcaoItem = isVipLogado ? `
+                <div class="flex items-center space-x-1">
+                    <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            ` : '';
+
+            subContasHtml += `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-file-invoice-dollar mr-1"></i> TIPO DE CONTA: ${acc.tipoConta || 'ENERGIA / LUZ'}</span>
+                        ${botoesAcaoItem}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${camposDinamicosHtml}</div>
+                </div>
+            `;
+        });
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">${acc.morada || 'Morada não informada'}</p>
-                    </div>
-                    ${botoesAcaoItem}
+                <div class="border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${nomeCasa}</h3>
+                    <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> Morada / Localização: <span class="text-slate-200">${grupo.morada || 'Não informada'}</span></p>
                 </div>
-                ${exibirLuz && luzCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-amber-400 uppercase">Energia / Luz</span><div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${luzCamposHtml}</div></div>` : ''}
-                ${exibirAgua && aguaCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-cyan-400 uppercase">Água / Saneamento</span><div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">${aguaCamposHtml}</div></div>` : ''}
+                <div class="space-y-4">
+                    ${subContasHtml}
+                </div>
             </div>
         `;
-    });
+    }
+
     container.innerHTML = html;
 }
 
@@ -855,41 +871,75 @@ function renderAcessos() {
         else btnAddSenhas.classList.add('hidden');
     }
 
-    let html = '';
+    const gruposPorCasa = {};
     acessosList.forEach(acc => {
-        let exibirLuz = acc.temLuz !== false;
-        let exibirAgua = acc.temAgua !== false;
+        const nomeCasa = acc.nome || "Outra Propriedade";
+        if (!gruposPorCasa[nomeCasa]) {
+            gruposPorCasa[nomeCasa] = {
+                morada: acc.morada || '',
+                contas: []
+            };
+        }
+        if (acc.morada && !gruposPorCasa[nomeCasa].morada) {
+            gruposPorCasa[nomeCasa].morada = acc.morada;
+        }
+        gruposPorCasa[nomeCasa].contas.push(acc);
+    });
 
-        let luzCamposHtml = '';
-        if (acc.luzLogin) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login/UC: <strong class="text-white">${acc.luzLogin}</strong></span><button onclick="copiarTexto('${acc.luzLogin}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.luzSenha) luzCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.luzSenha}</strong></span><button onclick="copiarTexto('${acc.luzSenha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+    let html = '';
+    for (let nomeCasa in gruposPorCasa) {
+        const grupo = gruposPorCasa[nomeCasa];
+        let subContasHtml = '';
 
-        let aguaCamposHtml = '';
-        if (acc.aguaCpf) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.aguaCpf}</strong></span><button onclick="copiarTexto('${acc.aguaCpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.aguaMatricula) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.aguaMatricula}</strong></span><button onclick="copiarTexto('${acc.aguaMatricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
-        if (acc.aguaSenha) aguaCamposHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.aguaSenha}</strong></span><button onclick="copiarTexto('${acc.aguaSenha}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+        grupo.contas.forEach(acc => {
+            let nomeSiteFormatado = acc.nomeSite || "Portal Oficial";
+            if (acc.portal) {
+                if (acc.portal.includes("coopera")) nomeSiteFormatado = "Portal Coopera";
+                else if (acc.portal.includes("cooperalianca")) nomeSiteFormatado = "Portal Cooperaliança";
+                else if (acc.portal.includes("casan")) nomeSiteFormatado = "Casan";
+                else if (acc.portal.includes("samaerincao")) nomeSiteFormatado = "Samae Rincão";
+            }
 
-        let botoesAcaoItem = isVipLogado ? `
-            <div class="flex items-center space-x-1">
-                <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        ` : '';
+            let camposDinamicosHtml = '';
+            if (acc.portal) {
+                camposDinamicosHtml += `<div class="col-span-full mb-1"><a href="${acc.portal}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-1 text-[10px]"></i> ${acc.tipoConta || 'Serviço'} - ${nomeSiteFormatado}</a></div>`;
+            }
+            if (acc.login) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Login / UC / Email: <strong class="text-white">${acc.login}</strong></span><button onclick="copiarTexto('${acc.login}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.cpf) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">CPF: <strong class="text-white">${acc.cpf}</strong></span><button onclick="copiarTexto('${acc.cpf}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.matricula) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Matrícula: <strong class="text-white">${acc.matricula}</strong></span><button onclick="copiarTexto('${acc.matricula}')" class="text-slate-400 hover:text-cyan-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+            if (acc.senha) camposDinamicosHtml += `<div class="bg-slate-900 p-2 rounded-lg flex justify-between items-center border border-slate-800"><span class="text-slate-400 truncate">Senha: <strong class="text-white">${acc.senha}</strong></span><button onclick="copiarTexto('${acc.senha}')" class="text-slate-400 hover:text-amber-400 text-[10px]"><i class="fa-regular fa-copy"></i></button></div>`;
+
+            let botoesAcaoItem = isVipLogado ? `
+                <div class="flex items-center space-x-1">
+                    <button onclick="openEditAccessModal(${acc.id})" class="text-amber-400 hover:text-amber-300 p-2 text-xs" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteAccess(${acc.id})" class="text-rose-400 hover:text-rose-300 p-2 text-xs" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            ` : '';
+
+            subContasHtml += `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-shield-halved mr-1"></i> TIPO DE CONTA: ${acc.tipoConta || 'SENHA'}</span>
+                        ${botoesAcaoItem}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${camposDinamicosHtml}</div>
+                </div>
+            `;
+        });
 
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-                <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${acc.nome}</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">${acc.morada || ''}</p>
-                    </div>
-                    ${botoesAcaoItem}
+                <div class="border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${nomeCasa}</h3>
+                    <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> Morada / Localização: <span class="text-slate-200">${grupo.morada || 'Não informada'}</span></p>
                 </div>
-                ${exibirLuz && luzCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-amber-400 uppercase">Energia / Luz</span><div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">${luzCamposHtml}</div></div>` : ''}
-                ${exibirAgua && aguaCamposHtml ? `<div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2"><span class="text-xs font-bold text-cyan-400 uppercase">Água / Saneamento</span><div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">${aguaCamposHtml}</div></div>` : ''}
+                <div class="space-y-4">
+                    ${subContasHtml}
+                </div>
             </div>
         `;
-    });
+    }
+
     container.innerHTML = html;
 }
 
@@ -1126,7 +1176,44 @@ function openAccessModal() {
         alert("Acesso negado! Apenas administradores VIP.");
         return;
     }
+    
+    const formAcesso = document.getElementById('access-form');
+    if (formAcesso) formAcesso.reset();
+
+    const selectTipo = document.getElementById('acc-tipo');
+    if (selectTipo) selectTipo.value = "Energia / Luz";
+
+    const containerNovo = document.getElementById('container-novo-tipo');
+    if (containerNovo) containerNovo.classList.add('hidden');
+
+    const inputNovoTipo = document.getElementById('acc-novo-tipo-input');
+    if (inputNovoTipo) inputNovoTipo.value = '';
+
     document.getElementById('access-modal').classList.remove('hidden');
+}
+
+function verificarNovoTipoConta(valor) {
+    const containerNovo = document.getElementById('container-novo-tipo');
+    const inputNovoTipo = document.getElementById('acc-novo-tipo-input');
+    if (valor === 'novo') {
+        if (containerNovo) containerNovo.classList.remove('hidden');
+        if (inputNovoTipo) inputNovoTipo.focus();
+    } else {
+        if (containerNovo) containerNovo.classList.add('hidden');
+        if (inputNovoTipo) inputNovoTipo.value = '';
+    }
+}
+
+function verificarNovoTipoEdicao(valor) {
+    const containerNovo = document.getElementById('container-novo-tipo-edit');
+    const inputNovoTipo = document.getElementById('edit-acc-novo-tipo-input');
+    if (valor === 'novo') {
+        if (containerNovo) containerNovo.classList.remove('hidden');
+        if (inputNovoTipo) inputNovoTipo.focus();
+    } else {
+        if (containerNovo) containerNovo.classList.add('hidden');
+        if (inputNovoTipo) inputNovoTipo.value = '';
+    }
 }
 
 function closeAccessModal() {
@@ -1137,22 +1224,27 @@ function handleAccessSubmit(event) {
     event.preventDefault();
     if (!adminLogadoAtual || !adminLogadoAtual.vip) return;
 
-    const temLuz = document.getElementById('chk-luz').checked;
-    const temAgua = document.getElementById('chk-agua').checked;
+    let tipoContaFinal = document.getElementById('acc-tipo').value;
+    if (tipoContaFinal === 'novo') {
+        const novoTipoVal = document.getElementById('acc-novo-tipo-input').value.trim();
+        if (novoTipoVal) {
+            tipoContaFinal = novoTipoVal;
+        } else {
+            tipoContaFinal = "Outros";
+        }
+    }
 
     acessosList.push({
         id: Date.now(),
         nome: document.getElementById('acc-nome').value,
         morada: document.getElementById('acc-morada').value,
-        temLuz,
-        luzPortal: temLuz ? document.getElementById('acc-luz-portal').value : '',
-        luzLogin: temLuz ? document.getElementById('acc-luz-login').value : '',
-        luzSenha: temLuz ? document.getElementById('acc-luz-senha').value : '',
-        temAgua,
-        aguaPortal: temAgua ? document.getElementById('acc-agua-portal').value : '',
-        aguaCpf: temAgua ? document.getElementById('acc-agua-cpf').value : '',
-        aguaMatricula: temAgua ? document.getElementById('acc-agua-mat').value : '',
-        aguaSenha: temAgua ? document.getElementById('acc-agua-senha').value : ''
+        tipoConta: tipoContaFinal,
+        nomeSite: document.getElementById('acc-nome-site').value,
+        portal: document.getElementById('acc-portal').value,
+        login: document.getElementById('acc-login').value,
+        cpf: document.getElementById('acc-cpf').value,
+        matricula: document.getElementById('acc-matricula').value,
+        senha: document.getElementById('acc-senha').value
     });
 
     salvarNoLocalStorage();
@@ -1169,13 +1261,39 @@ function openEditAccessModal(id) {
     document.getElementById('edit-acc-id').value = acc.id;
     document.getElementById('edit-acc-nome').value = acc.nome;
     document.getElementById('edit-acc-morada').value = acc.morada || '';
-    document.getElementById('edit-acc-luz-portal').value = acc.luzPortal || '';
-    document.getElementById('edit-acc-luz-login').value = acc.luzLogin || '';
-    document.getElementById('edit-acc-luz-senha').value = acc.luzSenha || '';
-    document.getElementById('edit-acc-agua-portal').value = acc.aguaPortal || '';
-    document.getElementById('edit-acc-agua-cpf').value = acc.aguaCpf || '';
-    document.getElementById('edit-acc-agua-mat').value = acc.aguaMatricula || '';
-    document.getElementById('edit-acc-agua-senha').value = acc.aguaSenha || '';
+    
+    const selectTipo = document.getElementById('edit-acc-tipo');
+    const containerNovo = document.getElementById('container-novo-tipo-edit');
+    const inputNovoTipo = document.getElementById('edit-acc-novo-tipo-input');
+
+    if (selectTipo) {
+        let existeOpcao = false;
+        for (let opt of selectTipo.options) {
+            if (opt.value === acc.tipoConta) {
+                existeOpcao = true;
+                break;
+            }
+        }
+        if (existeOpcao) {
+            selectTipo.value = acc.tipoConta || 'Energia / Luz';
+            if (containerNovo) containerNovo.classList.add('hidden');
+            if (inputNovoTipo) inputNovoTipo.value = '';
+        } else if (acc.tipoConta) {
+            selectTipo.value = 'novo';
+            if (containerNovo) containerNovo.classList.remove('hidden');
+            if (inputNovoTipo) inputNovoTipo.value = acc.tipoConta;
+        } else {
+            selectTipo.value = 'Energia / Luz';
+            if (containerNovo) containerNovo.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('edit-acc-nome-site').value = acc.nomeSite || '';
+    document.getElementById('edit-acc-portal').value = acc.portal || '';
+    document.getElementById('edit-acc-login').value = acc.login || '';
+    document.getElementById('edit-acc-cpf').value = acc.cpf || '';
+    document.getElementById('edit-acc-matricula').value = acc.matricula || '';
+    document.getElementById('edit-acc-senha').value = acc.senha || '';
 
     document.getElementById('edit-access-modal').classList.remove('hidden');
 }
@@ -1192,15 +1310,25 @@ function handleEditAccessSubmit(event) {
     const acc = acessosList.find(a => a.id === id);
     if (!acc) return;
 
+    let tipoContaFinal = document.getElementById('edit-acc-tipo').value;
+    if (tipoContaFinal === 'novo') {
+        const novoTipoVal = document.getElementById('edit-acc-novo-tipo-input').value.trim();
+        if (novoTipoVal) {
+            tipoContaFinal = novoTipoVal;
+        } else {
+            tipoContaFinal = "Outros";
+        }
+    }
+
     acc.nome = document.getElementById('edit-acc-nome').value;
     acc.morada = document.getElementById('edit-acc-morada').value;
-    acc.luzPortal = document.getElementById('edit-acc-luz-portal').value;
-    acc.luzLogin = document.getElementById('edit-acc-luz-login').value;
-    acc.luzSenha = document.getElementById('edit-acc-luz-senha').value;
-    acc.aguaPortal = document.getElementById('edit-acc-agua-portal').value;
-    acc.aguaCpf = document.getElementById('edit-acc-agua-cpf').value;
-    acc.aguaMatricula = document.getElementById('edit-acc-agua-mat').value;
-    acc.aguaSenha = document.getElementById('edit-acc-agua-senha').value;
+    acc.tipoConta = tipoContaFinal;
+    acc.nomeSite = document.getElementById('edit-acc-nome-site').value;
+    acc.portal = document.getElementById('edit-acc-portal').value;
+    acc.login = document.getElementById('edit-acc-login').value;
+    acc.cpf = document.getElementById('edit-acc-cpf').value;
+    acc.matricula = document.getElementById('edit-acc-matricula').value;
+    acc.senha = document.getElementById('edit-acc-senha').value;
 
     salvarNoLocalStorage();
     closeEditAccessModal();

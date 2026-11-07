@@ -37,60 +37,67 @@
     </script>
 
     <!-- BARRA LATERAL (SIDEBAR) -->
-    <aside class="w-80 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between select-none shadow-2xl z-20">
+    <aside id="sidebar-principal" class="w-80 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between select-none shadow-2xl z-20 transition-all duration-300">
         <div>
-            <div class="mb-10 text-center">
-                <div class="inline-block p-3 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-3">
-                    <i class="fa-solid fa-house-chimney text-2xl"></i>
+            <div class="mb-10 text-center relative">
+                <!-- Botão de Minimizar / Aumentar Menu -->
+                <button onclick="toggleMinimizarSidebar()" class="absolute -right-3 top-0 bg-slate-800 hover:bg-slate-700 text-cyan-400 p-2 rounded-full border border-slate-700 shadow-md transition" title="Minimizar / Aumentar Menu">
+                    <i id="icone-toggle-sidebar" class="fa-solid fa-angles-left text-xs"></i>
+                </button>
+
+                <div id="sidebar-title-container">
+                    <div class="inline-block p-3 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-3">
+                        <i class="fa-solid fa-house-chimney text-2xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-wider text-white">AUTOMAÇÃO CASA</h1>
+                    <p class="text-xs text-blue-400 font-medium tracking-widest mt-1">HIAM VITOR</p>
                 </div>
-                <h1 class="text-xl font-bold tracking-wider text-white">AUTOMAÇÃO CASA</h1>
-                <p class="text-xs text-blue-400 font-medium tracking-widest mt-1">HIAM VITOR</p>
             </div>
 
             <nav class="space-y-4">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-2">Menu de Navegação</p>
+                <p id="label-menu-nav" class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-2">Menu de Navegação</p>
                 <button onclick="switchTab('home')" id="btn-home" class="sidebar-tab active w-full text-left py-3.5 px-6 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center space-x-4 text-white font-semibold shadow-md">
                     <i class="fa-solid fa-house text-lg w-6 text-center text-blue-400"></i>
-                    <span class="tracking-wide">Tela Inicial</span>
+                    <span class="tracking-wide nav-text">Tela Inicial</span>
                 </button>
                 <button onclick="switchTab('automacao')" id="btn-automacao" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-sliders text-lg w-6 text-center"></i>
-                    <span class="tracking-wide">Automação</span>
+                    <span class="tracking-wide nav-text">Automação</span>
                 </button>
                 <button onclick="switchTab('tv')" id="btn-tv" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-tv text-lg w-6 text-center"></i>
-                    <span class="tracking-wide">TV / Séries</span>
+                    <span class="tracking-wide nav-text">TV / Séries</span>
                 </button>
                 <button onclick="solicitarSenhaTab('contas')" id="btn-contas" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-wallet text-lg w-6 text-center"></i>
-                    <span class="tracking-wide">Contas da Casa</span>
+                    <span class="tracking-wide nav-text">Contas da Casa</span>
                 </button>
                 <button onclick="solicitarSenhaTab('senhas')" id="btn-senhas" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-shield-halved text-lg w-6 text-center"></i>
-                    <span class="tracking-wide">Senhas da Casa</span>
+                    <span class="tracking-wide nav-text">Senhas da Casa</span>
                 </button>
                 <button onclick="solicitarSenhaTab('senhas-pessoais')" id="btn-senhas-pessoais" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-key text-lg w-6 text-center text-purple-400"></i>
-                    <span class="tracking-wide">Senhas Pessoais</span>
+                    <span class="tracking-wide nav-text">Senhas Pessoais</span>
                 </button>
                 <button onclick="solicitarSenhaTab('administrador')" id="btn-administrador" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
                     <i class="fa-solid fa-user-gear text-lg w-6 text-center"></i>
-                    <span class="tracking-wide">Administrador</span>
+                    <span class="tracking-wide nav-text">Administrador</span>
                 </button>
             </nav>
         </div>
 
         <div class="pt-6 border-t border-slate-800/80 space-y-3">
             <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500">Residência Hiam</span>
+                <span class="text-slate-500 sidebar-footer-text">Residência Hiam</span>
                 <span class="flex items-center space-x-1.5 text-emerald-400">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="label-status-rede">Web Sincronizada</span>
+                    <span id="label-status-rede" class="sidebar-footer-text">Web Sincronizada</span>
                 </span>
             </div>
             <button onclick="forcarAtualizacaoGeralDispositivos()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-[11px] font-semibold py-2 px-3 rounded-xl border border-slate-700/60 transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-rotate"></i>
-                <span>Atualizar Todos Dispositivos</span>
+                <span class="sidebar-footer-text">Atualizar Todos Dispositivos</span>
             </button>
         </div>
     </aside>
@@ -204,10 +211,6 @@
                     <span class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Entretenimento</span>
                     <h2 class="text-3xl font-extrabold text-white mt-1">TV, Séries & Animes</h2>
                 </div>
-                <button onclick="removerTodosTitulos()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg flex items-center space-x-2">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>Remover Todos</span>
-                </button>
             </header>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -262,11 +265,7 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Filmes</h2>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="removerPorCategoria('Filme')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center space-x-2">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span>Remover Filmes</span>
-                    </button>
+                <div>
                     <button onclick="openModal('Filme')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Filme</span>
@@ -288,11 +287,7 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Séries</h2>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="removerPorCategoria('Série')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center space-x-2">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span>Remover Séries</span>
-                    </button>
+                <div>
                     <button onclick="openModal('Série')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Série</span>
@@ -314,11 +309,7 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Animes</h2>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="removerPorCategoria('Anime')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center space-x-2">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span>Remover Animes</span>
-                    </button>
+                <div>
                     <button onclick="openModal('Anime')" class="bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Anime</span>
@@ -375,7 +366,7 @@
                     <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Segurança & Portais</span>
                     <h2 class="text-3xl font-extrabold text-white mt-1">Senhas e Acessos das Casas</h2>
                 </div>
-                <button id="btn-add-senhas" onclick="openAccessModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20 flex items-center space-x-2">
+                <button id="btn-add-senhas" onclick="openAccessModal()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20 flex items-center space-x-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Adicionar Acesso</span>
                 </button>
@@ -433,7 +424,6 @@
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Filme / Série / Anime</label>
                     <input type="text" id="input-nome" required placeholder="Ex: Naruto, Solo Leveling, Interstellar..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    <p class="text-[11px] text-cyan-400 mt-1"><i class="fa-solid fa-database mr-1"></i> Sincronização automática com catálogos oficiais ativada.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
@@ -443,9 +433,23 @@
                         <option value="Anime">Anime</option>
                     </select>
                 </div>
+
+                <!-- Barra de Progresso de Carregamento -->
+                <div id="loading-progress-container" class="hidden space-y-2 pt-2">
+                    <div class="flex justify-between text-xs text-blue-400 font-medium">
+                        <span id="loading-status-text">A consultar catálogo e a traduzir...</span>
+                        <span id="loading-percent-text">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                        <div id="loading-bar-fill" class="bg-gradient-to-r from-blue-600 to-indigo-500 h-full w-0 transition-all duration-300 rounded-full"></div>
+                    </div>
+                </div>
+
                 <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
                     <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Salvar Título</button>
+                    <button type="submit" id="btn-submit-media" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20 flex items-center space-x-2">
+                        <span>Salvar</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -550,41 +554,45 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
                     <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos - Morro Estevão" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
-
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-bolt mr-1"></i> Energia / Luz</h4>
-                        <label class="flex items-center space-x-2 cursor-pointer select-none">
-                            <span class="text-xs text-slate-400">Tem Campo?</span>
-                            <input type="checkbox" id="chk-luz" checked onchange="toggleSecaoForm('luz')" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-                        </label>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
+                    <select id="acc-tipo" onchange="verificarNovoTipoConta(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                        <option value="Energia / Luz">Energia / Luz</option>
+                        <option value="Água / Saneamento">Água / Saneamento</option>
+                        <option value="Internet / Outros">Internet / Outros</option>
+                        <option value="novo">+ Novo Tipo</option>
+                    </select>
+                </div>
+                <div id="container-novo-tipo" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Novo Tipo de Conta</label>
+                    <input type="text" id="acc-novo-tipo-input" placeholder="Ex: Gás, IPTU, Condomínio..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
+                    <input type="text" id="acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
+                    <input type="text" id="acc-portal" placeholder="https://exemplo.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / UC / Email</label>
+                        <input type="text" id="acc-login" placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
-                    <div id="container-campos-luz" class="space-y-2">
-                        <input type="text" id="acc-luz-portal" placeholder="Link do Portal de Luz (URL)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="acc-luz-login" placeholder="Login / UC / Email" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                            <input type="text" id="acc-luz-senha" placeholder="Senha" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">CPF</label>
+                        <input type="text" id="acc-cpf" placeholder="000.000.000-00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
-
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-faucet-drip mr-1"></i> Água / Saneamento</h4>
-                        <label class="flex items-center space-x-2 cursor-pointer select-none">
-                            <span class="text-xs text-slate-400">Tem Campo?</span>
-                            <input type="checkbox" id="chk-agua" checked onchange="toggleSecaoForm('agua')" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
-                        </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Matrícula</label>
+                        <input type="text" id="acc-matricula" placeholder="Nº da Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
-                    <div id="container-campos-agua" class="space-y-2">
-                        <input type="text" id="acc-agua-portal" placeholder="Link do Portal de Água (URL)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="acc-agua-cpf" placeholder="CPF" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
-                            <input type="text" id="acc-agua-mat" placeholder="Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
-                        </div>
-                        <div>
-                            <input type="text" id="acc-agua-senha" placeholder="Senha de Água (se houver)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                        <input type="text" id="acc-senha" placeholder="Senha de acesso" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
 
@@ -614,25 +622,45 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
                     <input type="text" id="edit-acc-morada" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
-
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-bolt mr-1"></i> Energia / Luz</h4>
-                    <input type="text" id="edit-acc-luz-portal" placeholder="Link do Portal de Luz (URL)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="edit-acc-luz-login" placeholder="Login / UC / Email" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                        <input type="text" id="edit-acc-luz-senha" placeholder="Senha" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
+                    <select id="edit-acc-tipo" onchange="verificarNovoTipoEdicao(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                        <option value="Energia / Luz">Energia / Luz</option>
+                        <option value="Água / Saneamento">Água / Saneamento</option>
+                        <option value="Internet / Outros">Internet / Outros</option>
+                        <option value="novo">+ Novo Tipo</option>
+                    </select>
                 </div>
-
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-faucet-drip mr-1"></i> Água / Saneamento</h4>
-                    <input type="text" id="edit-acc-agua-portal" placeholder="Link do Portal de Água (URL)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="edit-acc-agua-cpf" placeholder="CPF" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
-                        <input type="text" id="edit-acc-agua-mat" placeholder="Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
+                <div id="container-novo-tipo-edit" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Novo Tipo de Conta</label>
+                    <input type="text" id="edit-acc-novo-tipo-input" placeholder="Ex: Gás, IPTU, Condomínio..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
+                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
+                    <input type="text" id="edit-acc-portal" placeholder="https://exemplo.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / UC / Email</label>
+                        <input type="text" id="edit-acc-login" placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
                     <div>
-                        <input type="text" id="edit-acc-agua-senha" placeholder="Senha de Água" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white text-xs">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">CPF</label>
+                        <input type="text" id="edit-acc-cpf" placeholder="000.000.000-00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Matrícula</label>
+                        <input type="text" id="edit-acc-matricula" placeholder="Nº da Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                        <input type="text" id="edit-acc-senha" placeholder="Senha de acesso" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
 
@@ -664,7 +692,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Utilizador / Login / E-mail</label>
-                    <input type="text" id="pers-login" required placeholder="Ex: hiamvitor" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                    <input type="text" id="pers-login" required placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
