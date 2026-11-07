@@ -17,7 +17,6 @@ let mediaList = JSON.parse(localStorage.getItem('hiam_mediaList')) || [];
 let currentActiveCategory = 'filmes';
 let currentOpenItemId = null;
 let currentSelectedTemp = 1;
-let temporadasDadosTempEdicao = {};
 
 let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
     {
@@ -502,6 +501,66 @@ function removerTodosTitulos() {
     }
 }
 
+async function recarregarInformacoesTitulo() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+
+    const icone = document.getElementById('icone-recarregar');
+    if (icone) icone.classList.add('fa-spin');
+
+    try {
+        const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
+        if (response.ok) {
+            const show = await response.json();
+            if (show.genres && show.genres.length > 0) {
+                item.genero = await traduzirParaPortugues(show.genres.join(" / "));
+            }
+            let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
+            item.resumo = await traduzirParaPortugues(resumoOriginal);
+            item.lancamento = show.premiered || item.lancamento;
+            item.termino = show.ended || item.termino;
+            if (show.image && show.image.original) item.poster = show.image.original;
+
+            if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                const temporadasMap = {};
+                for (const ep of show._embedded.episodes) {
+                    const tempNum = ep.season || 1;
+                    if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                    let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                    temporadasMap[tempNum].push({
+                        nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                        assistido: false,
+                        dataCheck: ""
+                    });
+                }
+                item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                item.temporadas = Object.keys(item.temporadasDados).length || 1;
+            }
+            salvarNoLocalStorage();
+            renderizarConteudoDetalhes();
+            alert("Informações recarregadas com sucesso!");
+        }
+    } catch (e) {
+        console.error("Erro ao recarregar:", e);
+        alert("Não foi possível atualizar as informações da API.");
+    } finally {
+        if (icone) icone.classList.remove('fa-spin');
+    }
+}
+
+function openEditItemModal() {
+    const item = mediaList.find(m => m.id === currentOpenItemId);
+    if (!item) return;
+    const novoNome = prompt("Editar nome do título:", item.nome);
+    if (novoNome && novoNome.trim() !== "") {
+        item.nome = novoNome.trim();
+        salvarNoLocalStorage();
+        document.getElementById('detalhe-titulo-topo').innerText = item.nome;
+        renderizarConteudoDetalhes();
+        renderMediaList(currentActiveCategory);
+    }
+}
+
 function renderContasCasa() {
     const container = document.getElementById('grid-contas-casa');
     if (!container) return;
@@ -509,10 +568,17 @@ function renderContasCasa() {
     acessosList.forEach(acc => {
         html += `
             <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                <h3 class="text-lg font-bold text-white flex items-center">
-                    <i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}
-                </h3>
-                <p class="text-xs text-slate-400">${acc.morada || ''}</p>
+                <div class="flex justify-between items-start">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-house-user text-emerald-400 mr-2"></i> ${acc.nome}
+                    </h3>
+                    <span onclick="apagarAcesso(${acc.id})" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></span>
+                </div>
+                <p class="text-xs text-slate-400">${acc.morada || 'Morada não informada'}</p>
+                <div class="border-t border-slate-800 pt-3 space-y-2 text-xs text-slate-300">
+                    ${acc.temLuz ? `<p>⚡ <strong>Luz:</strong> <a href="${acc.luzPortal}" target="_blank" class="text-blue-400 underline">Portal</a> | Login: ${acc.luzLogin}</p>` : ''}
+                    ${acc.temAgua ? `<p>💧 <strong>Água:</strong> <a href="${acc.aguaPortal}" target="_blank" class="text-blue-400 underline">Portal</a> | Matrícula: ${acc.aguaMatricula}</p>` : ''}
+                </div>
             </div>
         `;
     });
@@ -529,6 +595,11 @@ function renderAcessos() {
                 <h3 class="text-lg font-bold text-white flex items-center">
                     <i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> ${acc.nome}
                 </h3>
+                <p class="text-xs text-slate-400">${acc.morada || ''}</p>
+                <div class="border-t border-slate-800 pt-3 space-y-1.5 text-xs text-slate-300">
+                    <p><strong>Luz - Senha:</strong> ${acc.luzSenha || 'N/A'}</p>
+                    <p><strong>Água - Senha:</strong> ${acc.aguaSenha || 'N/A'}</p>
+                </div>
             </div>
         `;
     });
@@ -539,10 +610,24 @@ function renderSenhasPessoais() {
     const container = document.getElementById('grid-senhas-pessoais');
     if (!container) return;
     if (!adminLogadoAtual) {
-        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Efetue login para ver as suas senhas pessoais.</p></div>`;
+        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Efetue login na aba Administrador para ver as suas senhas pessoais.</p></div>`;
         return;
     }
-    container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Cofre Pessoal Desbloqueado.</p></div>`;
+    if (senhasPessoaisList.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400"><p class="text-white">Nenhuma credencial pessoal cadastrada.</p></div>`;
+        return;
+    }
+    let html = '';
+    senhasPessoaisList.forEach(p => {
+        html += `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
+                <h3 class="text-lg font-bold text-white">${p.servico}</h3>
+                <p class="text-xs text-slate-400">Login: ${p.login}</p>
+                <p class="text-xs text-purple-400">Senha: ${p.senha}</p>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
 }
 
 function renderAdmins() {
@@ -550,9 +635,87 @@ function renderAdmins() {
     if (!container) return;
     let html = '';
     adminsList.forEach(adm => {
-        html += `<div class="bg-slate-950 border border-slate-800 rounded-xl p-4"><h4 class="text-sm font-bold text-white">${adm.nome} (${adm.login})</h4></div>`;
+        html += `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex justify-between items-center">
+                <div>
+                    <h4 class="text-sm font-bold text-white">${adm.nome}</h4>
+                    <p class="text-xs text-slate-400">Login: ${adm.login}</p>
+                </div>
+                <span class="text-xs px-2 py-1 bg-blue-500/10 text-blue-400 rounded border border-blue-500/20">Admin</span>
+            </div>
+        `;
     });
     container.innerHTML = html;
+}
+
+function openAccessModal() {
+    const nome = prompt("Nome da Casa / Imóvel (ex: Casa Nova):");
+    if (!nome) return;
+    const morada = prompt("Morada / Endereço:", "");
+    acessosList.push({
+        id: Date.now(),
+        nome: nome,
+        morada: morada,
+        temLuz: true,
+        luzPortal: "",
+        luzLogin: "",
+        luzSenha: "",
+        temAgua: true,
+        aguaPortal: "",
+        aguaCpf: "",
+        aguaMatricula: "",
+        aguaSenha: ""
+    });
+    salvarNoLocalStorage();
+    renderizarInterfaceCompleta();
+    alert("Imóvel/Conta adicionado com sucesso!");
+}
+
+function openPersonalPassModal() {
+    if (!adminLogadoAtual) {
+        alert("Precisa de efetuar login como Administrador primeiro!");
+        solicitarSenhaTab('administrador');
+        return;
+    }
+    const servico = prompt("Nome do Serviço / Site:");
+    if (!servico) return;
+    const login = prompt("Login / Utilizador:", "");
+    const senha = prompt("Senha:", "");
+    senhasPessoaisList.push({
+        id: Date.now(),
+        servico,
+        login,
+        senha
+    });
+    salvarNoLocalStorage();
+    renderSenhasPessoais();
+    alert("Credencial pessoal salva com sucesso!");
+}
+
+function openAdminModal() {
+    const nome = prompt("Nome do Administrador:");
+    if (!nome) return;
+    const login = prompt("Login de acesso:");
+    const senha = prompt("Senha de acesso:");
+    if (!login || !senha) return;
+    adminsList.push({
+        id: Date.now(),
+        nome,
+        login,
+        senha,
+        vip: true
+    });
+    salvarNoLocalStorage();
+    renderAdmins();
+    alert("Novo administrador cadastrado com sucesso!");
+}
+
+function apagarAcesso(id) {
+    if (confirm("Deseja realmente apagar este registo?")) {
+        acessosList = acessosList.filter(a => a.id !== id);
+        salvarNoLocalStorage();
+        renderizarInterfaceCompleta();
+    }
 }
 
 function switchTab(tabId) {
