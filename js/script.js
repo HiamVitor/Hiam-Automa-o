@@ -95,7 +95,7 @@ let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 // GESTÃO DE SESSÃO E INATIVIDADE (15 MIN)
 // ==========================================
 let temporizadorInatividade = null;
-const TEMPO_LIMITE_INATIVIDADE = 15 * 60 * 1000;
+const TEMPO_LIMITE_INATIVIDADE = 5 * 60 * 1000;
 
 function reiniciarTemporizadorInatividade() {
     clearTimeout(temporizadorInatividade);
