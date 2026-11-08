@@ -114,6 +114,7 @@
                     <span id="label-status-rede" class="sidebar-footer-text">Web Sincronizada</span>
                 </span>
             </div>
+            <div id="timestamp-sync" class="text-[10px] text-slate-500 sidebar-footer-text">Última sync: --:--:--</div>
             <button onclick="forcarAtualizacaoGeralDispositivos()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-[11px] font-semibold py-2 px-3 rounded-xl border border-slate-700/60 transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-rotate"></i>
                 <span class="sidebar-footer-text">Atualizar Todos Dispositivos</span>
@@ -260,8 +261,8 @@
 
         <!-- SUBPÁGINAS E DETALHES -->
         <section id="subpage-filmes" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
-                <div class="flex items-center space-x-4">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
                     <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
@@ -271,7 +272,10 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Filmes</h2>
                     </div>
                 </div>
-                <div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-filmes" oninput="filtrarMediaLista('filmes')" placeholder="Pesquisar filme..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 w-48 md:w-64">
+                    </div>
                     <button onclick="openModal('Filme')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Filme</span>
@@ -282,8 +286,8 @@
         </section>
 
         <section id="subpage-series" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
-                <div class="flex items-center space-x-4">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
                     <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
@@ -293,7 +297,10 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Séries</h2>
                     </div>
                 </div>
-                <div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-series" oninput="filtrarMediaLista('series')" placeholder="Pesquisar série..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 w-48 md:w-64">
+                    </div>
                     <button onclick="openModal('Série')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Série</span>
@@ -304,8 +311,8 @@
         </section>
 
         <section id="subpage-animes" class="hidden space-y-8">
-            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
-                <div class="flex items-center space-x-4">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
                     <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Voltar</span>
@@ -315,7 +322,10 @@
                         <h2 class="text-3xl font-extrabold text-white mt-1">Animes</h2>
                     </div>
                 </div>
-                <div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-animes" oninput="filtrarMediaLista('animes')" placeholder="Pesquisar anime..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-pink-500 w-48 md:w-64">
+                    </div>
                     <button onclick="openModal('Anime')" class="bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span>Adicionar Anime</span>
@@ -872,6 +882,7 @@
         let currentOpenItemId = null;
         let currentSelectedTemp = 1;
         let temporadasDadosTempEdicao = {};
+        let termoBuscaAtual = '';
 
         let acessosList = JSON.parse(localStorage.getItem('hiam_acessosList')) || [
             {
@@ -914,6 +925,25 @@
         let tabPendenteParaDesbloquear = '';
         let adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
 
+        // ==========================================
+        // GESTÃO DE SESSÃO E INATIVIDADE (15 MIN)
+        // ==========================================
+        let temporizadorInatividade = null;
+        const TEMPO_LIMITE_INATIVIDADE = 15 * 60 * 1000;
+
+        function reiniciarTemporizadorInatividade() {
+            clearTimeout(temporizadorInatividade);
+            temporizadorInatividade = setTimeout(() => {
+                adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
+                switchTab('home');
+                console.warn("Sessão bloqueada por inatividade.");
+            }, TEMPO_LIMITE_INATIVIDADE);
+        }
+
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evento => {
+            window.addEventListener(evento, reiniciarTemporizadorInatividade);
+        });
+
         function salvarNoLocalStorage() {
             localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
             localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
@@ -941,37 +971,16 @@
         async function carregarDadosDaNuvem() {
             if (window.db && window.dbHelpers) {
                 try {
-                    const { doc, getDoc, onSnapshot } = window.dbHelpers;
+                    const { doc, onSnapshot, setDoc } = window.dbHelpers;
                     const docRef = doc(window.db, "dados", "principal");
                     
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const dados = docSnap.data();
-                        if (dados.mediaList) mediaList = dados.mediaList;
-                        if (dados.acessosList) acessosList = dados.acessosList;
-                        if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
-                        if (dados.adminsList) {
-                            adminsList = dados.adminsList;
-                            if (adminLogadoAtual) {
-                                const adminAtualizado = adminsList.find(a => a.login === adminLogadoAtual.login);
-                                if (adminAtualizado) {
-                                    adminLogadoAtual = adminAtualizado;
-                                } else {
-                                    adminLogadoAtual = adminsList.find(a => a.vip) || adminsList[0];
-                                }
-                            }
-                        }
-
-                        renderizarInterfaceCompleta();
-                    }
-
-                    onSnapshot(docRef, (docSnapSnapshot) => {
+                    onSnapshot(docRef, async (docSnapSnapshot) => {
                         if (docSnapSnapshot.exists()) {
                             const dados = docSnapSnapshot.data();
                             
-                            mediaList = dados.mediaList || mediaList;
-                            acessosList = dados.acessosList || acessosList;
-                            senhasPessoaisList = dados.senhasPessoaisList || senhasPessoaisList;
+                            if (dados.mediaList) mediaList = dados.mediaList;
+                            if (dados.acessosList) acessosList = dados.acessosList;
+                            if (dados.senhasPessoaisList) senhasPessoaisList = dados.senhasPessoaisList;
                             
                             if (dados.adminsList) {
                                 adminsList = dados.adminsList;
@@ -983,9 +992,24 @@
                                 }
                             }
 
+                            localStorage.setItem('hiam_mediaList', JSON.stringify(mediaList));
+                            localStorage.setItem('hiam_acessosList', JSON.stringify(acessosList));
+                            localStorage.setItem('hiam_senhasPessoaisList', JSON.stringify(senhasPessoaisList));
+                            localStorage.setItem('hiam_adminsList', JSON.stringify(adminsList));
+
                             renderizarInterfaceCompleta();
                             atualizarTimestampSyncWeb();
+                        } else {
+                            await setDoc(docRef, {
+                                mediaList: JSON.parse(JSON.stringify(mediaList)),
+                                acessosList: JSON.parse(JSON.stringify(acessosList)),
+                                senhasPessoaisList: JSON.parse(JSON.stringify(senhasPessoaisList)),
+                                adminsList: JSON.parse(JSON.stringify(adminsList)),
+                                ultimaAtualizacao: new Date().toISOString()
+                            });
                         }
+                    }, (error) => {
+                        console.error("Erro no listener onSnapshot do Firebase:", error);
                     });
                 } catch (e) {
                     console.error("Erro ao carregar dados do Firebase:", e);
@@ -1034,13 +1058,17 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             switchTab('home');
-            
+            renderizarInterfaceCompleta();
+            atualizarTimestampSyncWeb();
+            reiniciarTemporizadorInatividade();
+
             window.addEventListener('firebase-ready', () => {
                 carregarDadosDaNuvem();
             });
 
-            renderizarInterfaceCompleta();
-            atualizarTimestampSyncWeb();
+            if (window.db && window.dbHelpers) {
+                carregarDadosDaNuvem();
+            }
         });
 
         function solicitarSenhaTab(tabId) {
@@ -1394,6 +1422,15 @@
             renderizarConteudoDetalhes();
         }
 
+        function filtrarMediaLista(category) {
+            const inputId = 'input-busca-' + category;
+            const inputEl = document.getElementById(inputId);
+            if (inputEl) {
+                termoBuscaAtual = inputEl.value.toLowerCase().trim();
+            }
+            renderMediaList(category);
+        }
+
         function renderMediaList(category) {
             let containerId = '', tipoFiltro = '', accentColor = '', iconClass = '';
             if (category === 'filmes') { containerId = 'grid-filmes'; tipoFiltro = 'Filme'; accentColor = 'cyan'; iconClass = 'fa-film'; }
@@ -1402,13 +1439,18 @@
 
             const container = document.getElementById(containerId);
             if (!container) return;
-            const filteredItems = mediaList.filter(item => item.tipo === tipoFiltro);
+
+            const filteredItems = mediaList.filter(item => {
+                const matchTipo = item.tipo === tipoFiltro;
+                const matchTermo = !termoBuscaAtual || item.nome.toLowerCase().includes(termoBuscaAtual) || (item.genero && item.genero.toLowerCase().includes(termoBuscaAtual));
+                return matchTipo && matchTermo;
+            });
 
             if (filteredItems.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-slate-900/60 border border-slate-800 p-8 rounded-2xl text-center text-slate-400">
                         <i class="fa-solid ${iconClass} text-4xl text-${accentColor}-400 mb-3"></i>
-                        <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} adicionado ainda.</p>
+                        <p class="text-lg font-medium text-white">Nenhum ${tipoFiltro.toLowerCase()} encontrado.</p>
                     </div>
                 `;
                 return;
@@ -1605,7 +1647,6 @@
                 else btnAddContas.classList.add('hidden');
             }
 
-            // Agrupar acessos por nome da propriedade / casa
             const gruposPorCasa = {};
             acessosList.forEach(acc => {
                 const nomeCasa = acc.nome || "Outra Propriedade";
@@ -1689,7 +1730,6 @@
                 else btnAddSenhas.classList.add('hidden');
             }
 
-            // Agrupar acessos por nome da propriedade / casa
             const gruposPorCasa = {};
             acessosList.forEach(acc => {
                 const nomeCasa = acc.nome || "Outra Propriedade";
@@ -1995,8 +2035,6 @@
                 alert("Acesso negado! Apenas administradores VIP.");
                 return;
             }
-            
-            // Limpar todos os campos do formulário para virem em branco
             const formAcesso = document.getElementById('access-form');
             if (formAcesso) formAcesso.reset();
 
@@ -2184,6 +2222,7 @@
 
             const targetTab = document.getElementById('tab-' + tabId);
             const targetBtn = document.getElementById('btn-' + tabId);
+            
             if (targetTab) targetTab.classList.remove('hidden');
             if (targetBtn) {
                 targetBtn.classList.add('active', 'text-white');
@@ -2201,6 +2240,12 @@
             ['filmes', 'series', 'animes', 'detalhes'].forEach(s => {
                 const el = document.getElementById('subpage-' + s);
                 if (el) el.classList.add('hidden');
+            });
+
+            termoBuscaAtual = '';
+            ['filmes', 'series', 'animes'].forEach(cat => {
+                const inputB = document.getElementById('input-busca-' + cat);
+                if (inputB) inputB.value = '';
             });
 
             if (page === 'main') {
