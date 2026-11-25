@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+.sidebar-tab {
+  transform: skewX(-10deg);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-tab:hover {
+  transform: skewX(-10deg) translateX(6px);
+}
+
+.sidebar-tab.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-tab,
+  .sidebar-tab:hover {
+    transition: none;
+    transform: skewX(-10deg);
+  }
+}

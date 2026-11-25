@@ -1,0 +1,192 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Perfil operacional não-sensível do usuário e papel RBAC",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "photoURL": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ativo", "bloqueado"]
+        },
+        "stats": {
+          "type": "object",
+          "description": "Resumo numérico de registros do usuário"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "role", "status", "createdAt", "updatedAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Dados pessoais (PII) isolados do usuário",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "lastLoginAt", "updatedAt"]
+    },
+    "AdminMarker": {
+      "title": "AdminMarker",
+      "description": "Documento marcador de privilégio administrativo",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "grantedBy": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "grantedBy", "createdAt"]
+    },
+    "FinanceWorkspace": {
+      "title": "FinanceWorkspace",
+      "description": "Estado financeiro pessoal completo do usuário em formato nativo",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "accounts": { "type": "array" },
+        "cards": { "type": "array" },
+        "movements": { "type": "array" },
+        "purchases": { "type": "array" },
+        "personDebts": { "type": "array" },
+        "loans": { "type": "array" },
+        "receivables": { "type": "array" },
+        "recurringExpenses": { "type": "array" },
+        "logs": { "type": "array" },
+        "categories": { "type": "array" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "accounts",
+        "cards",
+        "movements",
+        "purchases",
+        "personDebts",
+        "loans",
+        "receivables",
+        "recurringExpenses",
+        "logs",
+        "categories",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminAuditLog": {
+      "title": "AdminAuditLog",
+      "description": "Registro de alterações administrativas de papéis e bloqueios",
+      "type": "object",
+      "properties": {
+        "actorUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "targetUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["promote_admin", "demote_admin", "block_user", "unblock_user", "bootstrap_admin"]
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["actorUid", "targetUid", "action", "details", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Perfis de usuários e papéis RBAC sem PII"
+    },
+    "/users/{userId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "PII isolada do usuário (email e último acesso)"
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminMarker" },
+      "description": "Marcadores confiáveis de administradores"
+    },
+    "/workspaces/{workspaceId}": {
+      "schema": { "$ref": "#/entities/FinanceWorkspace" },
+      "description": "Dados financeiros pessoais pertencentes ao proprietário"
+    },
+    "/adminLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AdminAuditLog" },
+      "description": "Logs de auditoria das ações do administrador"
+    }
+  }
+}

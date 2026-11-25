@@ -1,0 +1,6 @@
+{
+  "name": "Automação Casa",
+  "description": "Sistema inteligente de automação residencial, entretenimento, contas e acessos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

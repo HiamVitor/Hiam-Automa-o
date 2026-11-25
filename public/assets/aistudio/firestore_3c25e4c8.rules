@@ -1,0 +1,222 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Hardened Primitives ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isVerifiedOwner(uid) {
+      return isVerified() && request.auth.uid == uid;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerified() && request.auth.token.email == 'hiamvitorb@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+        (isVerified() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isActiveUser(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid)) &&
+        get(/databases/$(database)/documents/users/$(uid)).data.status == 'ativo';
+    }
+
+    // --- Validation Blueprints ---
+    function isValidUserStats(stats) {
+      return stats is map &&
+        stats.keys().hasAll(['accountsCount', 'cardsCount', 'entriesCount']) &&
+        stats.keys().hasOnly(['accountsCount', 'cardsCount', 'entriesCount']) &&
+        stats.accountsCount is int && stats.accountsCount >= 0 && stats.accountsCount <= 500 &&
+        stats.cardsCount is int && stats.cardsCount >= 0 && stats.cardsCount <= 200 &&
+        stats.entriesCount is int && stats.entriesCount >= 0 && stats.entriesCount <= 20000;
+    }
+
+    function isValidUserProfile(data, expectedUid) {
+      return data is map &&
+        data.keys().hasAll(['uid', 'displayName', 'role', 'status', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'displayName', 'photoURL', 'role', 'status', 'stats', 'createdAt', 'updatedAt']) &&
+        isValidId(data.uid) &&
+        data.uid == expectedUid &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+        data.role in ['admin', 'user'] &&
+        data.status in ['ativo', 'bloqueado'] &&
+        (!('stats' in data) || isValidUserStats(data.stats)) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidUserPrivateInfo(data, expectedUid) {
+      return data is map &&
+        data.keys().hasAll(['uid', 'email', 'lastLoginAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'lastLoginAt', 'updatedAt']) &&
+        isValidId(data.uid) &&
+        data.uid == expectedUid &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 254 &&
+        data.lastLoginAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidAdminMarker(data, expectedUid) {
+      return data is map &&
+        data.keys().hasAll(['uid', 'grantedBy', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'grantedBy', 'createdAt']) &&
+        isValidId(data.uid) &&
+        data.uid == expectedUid &&
+        isValidId(data.grantedBy) &&
+        data.grantedBy == request.auth.uid &&
+        data.createdAt == request.time;
+    }
+
+    function isValidListBoundary(arr, maxLen) {
+      return arr is list && arr.size() <= maxLen && (arr.size() == 0 || arr[0] is map);
+    }
+
+    function isValidWorkspace(data, expectedUid) {
+      return data is map &&
+        data.keys().hasAll([
+          'ownerId', 'accounts', 'cards', 'movements', 'purchases',
+          'personDebts', 'loans', 'receivables', 'recurringExpenses',
+          'logs', 'categories', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'ownerId', 'accounts', 'cards', 'movements', 'purchases',
+          'personDebts', 'loans', 'receivables', 'recurringExpenses',
+          'logs', 'categories', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.ownerId) &&
+        data.ownerId == expectedUid &&
+        isValidListBoundary(data.accounts, 100) &&
+        isValidListBoundary(data.cards, 50) &&
+        isValidListBoundary(data.movements, 2000) &&
+        isValidListBoundary(data.purchases, 1000) &&
+        isValidListBoundary(data.personDebts, 1000) &&
+        isValidListBoundary(data.loans, 300) &&
+        isValidListBoundary(data.receivables, 500) &&
+        isValidListBoundary(data.recurringExpenses, 300) &&
+        isValidListBoundary(data.logs, 500) &&
+        isValidListBoundary(data.categories, 100) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAdminAuditLog(data) {
+      return data is map &&
+        data.keys().hasAll(['actorUid', 'targetUid', 'action', 'details', 'createdAt']) &&
+        data.keys().hasOnly(['actorUid', 'targetUid', 'action', 'details', 'createdAt']) &&
+        isValidId(data.actorUid) &&
+        data.actorUid == request.auth.uid &&
+        isValidId(data.targetUid) &&
+        data.action in ['promote_admin', 'demote_admin', 'block_user', 'unblock_user', 'bootstrap_admin'] &&
+        data.details is string && data.details.size() >= 1 && data.details.size() <= 300 &&
+        data.createdAt == request.time;
+    }
+
+    // --- Collection Rules ---
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isVerifiedOwner(userId) || isAdmin());
+      allow list: if isBootstrappedAdmin() || (isVerified() && existing().uid == request.auth.uid);
+
+      allow create: if isValidId(userId) &&
+        isVerifiedOwner(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        incoming().status == 'ativo' &&
+        (incoming().role == 'user' || (incoming().role == 'admin' && isBootstrappedAdmin()));
+
+      allow update: if isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['role', 'status', 'updatedAt'])) ||
+          (isVerifiedOwner(userId) && existing().status == 'ativo' && incoming().role == existing().role && incoming().status == existing().status && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'stats', 'updatedAt']))
+        );
+
+      allow delete: if false;
+
+      match /private/{docId} {
+        allow get: if isValidId(userId) && docId == 'info' && (isVerifiedOwner(userId) || isAdmin());
+        allow list: if false;
+        allow create: if isValidId(userId) && docId == 'info' &&
+          isVerifiedOwner(userId) &&
+          exists(/databases/$(database)/documents/users/$(userId)) &&
+          isValidUserPrivateInfo(incoming(), userId);
+        allow update: if isValidId(userId) && docId == 'info' &&
+          isVerifiedOwner(userId) &&
+          isActiveUser(userId) &&
+          isValidUserPrivateInfo(incoming(), userId) &&
+          incoming().uid == existing().uid &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['email', 'lastLoginAt', 'updatedAt']);
+        allow delete: if false;
+      }
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && (isVerifiedOwner(adminUid) || isAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isValidId(adminUid) &&
+        isAdmin() &&
+        isValidAdminMarker(incoming(), adminUid);
+      allow update: if false;
+      allow delete: if isValidId(adminUid) && isAdmin() && adminUid != request.auth.uid;
+    }
+
+    match /workspaces/{workspaceId} {
+      allow get: if isValidId(workspaceId) && (isVerifiedOwner(workspaceId) || isAdmin());
+      allow list: if isVerified() && existing().ownerId == request.auth.uid;
+      allow create: if isValidId(workspaceId) &&
+        isVerifiedOwner(workspaceId) &&
+        isActiveUser(workspaceId) &&
+        isValidWorkspace(incoming(), workspaceId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(workspaceId) &&
+        isVerifiedOwner(workspaceId) &&
+        isActiveUser(workspaceId) &&
+        isValidWorkspace(incoming(), workspaceId) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'accounts', 'cards', 'movements', 'purchases',
+          'personDebts', 'loans', 'receivables', 'recurringExpenses',
+          'logs', 'categories', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /adminLogs/{logId} {
+      allow get: if isValidId(logId) && isAdmin();
+      allow list: if isBootstrappedAdmin() || (isVerified() && existing().actorUid == request.auth.uid);
+      allow create: if isValidId(logId) && isAdmin() && isValidAdminAuditLog(incoming());
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

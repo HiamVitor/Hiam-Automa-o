@@ -1,0 +1,17 @@
+FluxoPessoal - Controle de Gastos, Recebimentos e Finanças Pessoais
+======================================================================
+
+COMO ABRIR NO SEU COMPUTADOR:
+-----------------------------
+
+1) FORMA MAIS RÁPIDA (SEM INSTALAR NADA):
+   Dê um duplo clique no arquivo:  ABRIR_DIRETO.html
+   (Se você clicar em index.html direto, ele também redireciona para ABRIR_DIRETO.html!)
+
+2) MODO DESENVOLVEDOR (COM NODE.JS):
+   - Instale o Node.js (https://nodejs.org)
+   - No Windows, clique em INICIAR_WINDOWS.bat
+   - Ou rode no terminal:
+       npm install
+       npm run dev
+   - Abra http://localhost:3000 no navegador

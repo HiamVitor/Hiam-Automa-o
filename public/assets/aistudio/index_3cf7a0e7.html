@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automação Casa</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS (style.css) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
+
+    <!-- Firebase SDK Config / Inicialização -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDyft_hnFxcdA4tBU5Uv1UkRNBr8r1JEY",
+            authDomain: "teste-a69c4.firebaseapp.com",
+            projectId: "teste-a69c4",
+            storageBucket: "teste-a69c4.firebasestorage.app",
+            messagingSenderId: "62432958325",
+            appId: "1:62432958325:web:35a836c8f9330ab7aee53c",
+            measurementId: "G-XZJ991DGXR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.dbHelpers = { doc, setDoc, getDoc, onSnapshot };
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside id="sidebar-principal" class="w-80 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between select-none shadow-2xl z-20 transition-all duration-300">
+        <div>
+            <div class="mb-10 text-center relative">
+                <!-- Botão de Minimizar / Aumentar Menu -->
+                <button onclick="toggleMinimizarSidebar()" class="absolute -right-3 top-0 bg-slate-800 hover:bg-slate-700 text-cyan-400 p-2 rounded-full border border-slate-700 shadow-md transition" title="Minimizar / Aumentar Menu">
+                    <i id="icone-toggle-sidebar" class="fa-solid fa-angles-left text-xs"></i>
+                </button>
+
+                <div id="sidebar-title-container">
+                    <div class="inline-block p-3 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-3">
+                        <i class="fa-solid fa-house-chimney text-2xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-wider text-white">AUTOMAÇÃO CASA</h1>
+                    <p class="text-xs text-blue-400 font-medium tracking-widest mt-1">SISTEMA INTELIGENTE</p>
+                </div>
+            </div>
+
+            <nav class="space-y-4">
+                <p id="label-menu-nav" class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-2">Menu de Navegação</p>
+                <button onclick="switchTab('home')" id="btn-home" class="sidebar-tab active w-full text-left py-3.5 px-6 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center space-x-4 text-white font-semibold shadow-md">
+                    <i class="fa-solid fa-house text-lg w-6 text-center text-blue-400"></i>
+                    <span class="tracking-wide nav-text">Tela Inicial</span>
+                </button>
+                <button onclick="switchTab('automacao')" id="btn-automacao" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-sliders text-lg w-6 text-center"></i>
+                    <span class="tracking-wide nav-text">Automação</span>
+                </button>
+                <button onclick="switchTab('tv')" id="btn-tv" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-tv text-lg w-6 text-center"></i>
+                    <span class="tracking-wide nav-text">TV / Séries</span>
+                </button>
+                <button onclick="solicitarSenhaTab('contas')" id="btn-contas" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-wallet text-lg w-6 text-center"></i>
+                    <span class="tracking-wide nav-text">Contas da Casa</span>
+                </button>
+                <button onclick="solicitarSenhaTab('senhas')" id="btn-senhas" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-shield-halved text-lg w-6 text-center"></i>
+                    <span class="tracking-wide nav-text">Senhas da Casa</span>
+                </button>
+                <button onclick="solicitarSenhaTab('senhas-pessoais')" id="btn-senhas-pessoais" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-key text-lg w-6 text-center text-purple-400"></i>
+                    <span class="tracking-wide nav-text">Senhas Pessoais</span>
+                </button>
+                <button onclick="solicitarSenhaTab('administrador')" id="btn-administrador" class="sidebar-tab w-full text-left py-3.5 px-6 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center space-x-4 text-slate-400 font-semibold hover:text-white hover:bg-slate-800/40">
+                    <i class="fa-solid fa-user-gear text-lg w-6 text-center"></i>
+                    <span class="tracking-wide nav-text">Administrador</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="pt-6 border-t border-slate-800/80 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-500 sidebar-footer-text">Residência Principal</span>
+                <span class="flex items-center space-x-1.5 text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="label-status-rede" class="sidebar-footer-text">Web Sincronizada</span>
+                </span>
+            </div>
+            <div id="timestamp-sync" class="text-[10px] text-slate-500 sidebar-footer-text">Última sync: --:--:--</div>
+            <button onclick="forcarAtualizacaoGeralDispositivos()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-[11px] font-semibold py-2 px-3 rounded-xl border border-slate-700/60 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-rotate"></i>
+                <span class="sidebar-footer-text">Atualizar Todos Dispositivos</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 p-10 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
+
+        <!-- TELA INICIAL -->
+        <section id="tab-home" class="space-y-8">
+            <header class="flex justify-between items-center bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-blue-400 font-bold">Painel Geral</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Bem-vindo ao Sistema</h2>
+                </div>
+                <div class="flex items-center space-x-3 bg-slate-800/60 px-4 py-2 rounded-xl border border-slate-700/50">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span class="text-sm font-medium text-slate-300">Residência Principal Configurada</span>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div onclick="switchTab('automacao')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-sliders text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Automação</h3>
+                    <p class="text-xs text-slate-400">Controlo de luzes, tomadas, ar condicionado e portão.</p>
+                </div>
+
+                <div onclick="switchTab('tv')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-tv text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">TV / Séries</h3>
+                    <p class="text-xs text-slate-400">Gerencie streamings, lista de filmes e episódios favoritos.</p>
+                </div>
+
+                <div onclick="solicitarSenhaTab('contas')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wallet text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Contas da Casa</h3>
+                    <p class="text-xs text-slate-400">Acompanhe vencimentos de água, luz, internet e rendas.</p>
+                </div>
+
+                <div onclick="solicitarSenhaTab('senhas')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-shield-halved text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Senhas da Casa</h3>
+                    <p class="text-xs text-slate-400">Gerencie chaves Wi-Fi, fechaduras e acessos de streaming.</p>
+                </div>
+
+                <div onclick="solicitarSenhaTab('senhas-pessoais')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-key text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Senhas Pessoais</h3>
+                    <p class="text-xs text-slate-400">Consulte e gerencie as suas credenciais e cofres pessoais.</p>
+                </div>
+
+                <div onclick="solicitarSenhaTab('administrador')" class="group cursor-pointer bg-slate-900/80 border border-slate-800 hover:border-blue-400/50 p-6 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-user-gear text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Administrador</h3>
+                    <p class="text-xs text-slate-400">Gestão de utilizadores, administradores e definições do sistema.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUTOMAÇÃO -->
+        <section id="tab-automacao" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-blue-400 font-bold">Dispositivos Inteligentes</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Painel de Automação</h2>
+                </div>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-lightbulb text-xl"></i></div>
+                        <input type="checkbox" checked class="w-5 h-5 accent-blue-600">
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Luz da Sala</h3>
+                        <p class="text-xs text-slate-400 mt-1">Lâmpada Inteligente RGB</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TV / SÉRIES / ANIMES -->
+        <section id="tab-tv" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Entretenimento</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">TV, Séries & Animes</h2>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div onclick="switchSubPage('filmes')" class="group cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 rounded-2xl overflow-hidden transition-all duration-300 shadow-xl hover:-translate-y-1">
+                    <div class="h-36 bg-gradient-to-tr from-cyan-950 via-blue-900/60 to-slate-900 flex items-center justify-center relative">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-film text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-slate-900">
+                        <h3 class="text-xl font-bold text-white mb-3">Filmes</h3>
+                        <div class="h-1 w-full bg-cyan-400 rounded-full"></div>
+                    </div>
+                </div>
+
+                <div onclick="switchSubPage('series')" class="group cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 rounded-2xl overflow-hidden transition-all duration-300 shadow-xl hover:-translate-y-1">
+                    <div class="h-36 bg-gradient-to-tr from-indigo-950 via-purple-900/60 to-slate-900 flex items-center justify-center relative">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-tv text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-slate-900">
+                        <h3 class="text-xl font-bold text-white mb-3">Séries</h3>
+                        <div class="h-1 w-full bg-indigo-400 rounded-full"></div>
+                    </div>
+                </div>
+
+                <div onclick="switchSubPage('animes')" class="group cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-pink-500/50 rounded-2xl overflow-hidden transition-all duration-300 shadow-xl hover:-translate-y-1">
+                    <div class="h-36 bg-gradient-to-tr from-pink-950 via-rose-900/60 to-slate-900 flex items-center justify-center relative">
+                        <div class="w-14 h-14 rounded-2xl bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-video text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-slate-900">
+                        <h3 class="text-xl font-bold text-white mb-3">Animes</h3>
+                        <div class="h-1 w-full bg-pink-400 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUBPÁGINAS E DETALHES -->
+        <section id="subpage-filmes" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Voltar</span>
+                    </button>
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold">Catálogo</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Filmes</h2>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-filmes" oninput="filtrarMediaLista('filmes')" placeholder="Pesquisar filme..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 w-48 md:w-64">
+                    </div>
+                    <button onclick="openModal('Filme')" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Adicionar Filme</span>
+                    </button>
+                </div>
+            </header>
+            <div id="grid-filmes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="subpage-series" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Voltar</span>
+                    </button>
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Catálogo</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Séries</h2>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-series" oninput="filtrarMediaLista('series')" placeholder="Pesquisar série..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 w-48 md:w-64">
+                    </div>
+                    <button onclick="openModal('Série')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Adicionar Série</span>
+                    </button>
+                </div>
+            </header>
+            <div id="grid-series" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="subpage-animes" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto">
+                    <button onclick="switchSubPage('main')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Voltar</span>
+                    </button>
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-pink-400 font-bold">Catálogo</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-1">Animes</h2>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                    <div class="relative">
+                        <input type="text" id="input-busca-animes" oninput="filtrarMediaLista('animes')" placeholder="Pesquisar anime..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-pink-500 w-48 md:w-64">
+                    </div>
+                    <button onclick="openModal('Anime')" class="bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-pink-600/20 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Adicionar Anime</span>
+                    </button>
+                </div>
+            </header>
+            <div id="grid-animes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="subpage-detalhes" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button id="btn-voltar-detalhes" onclick="switchSubPage('filmes')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Voltar</span>
+                    </button>
+                    <div>
+                        <span id="detalhe-categoria-tag" class="text-xs uppercase tracking-widest text-cyan-400 font-bold">Detalhes</span>
+                        <h2 id="detalhe-titulo-topo" class="text-3xl font-extrabold text-white mt-1">Nome do Título</h2>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="btn-recarregar-info" onclick="recarregarInformacoesTitulo()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/40 text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg flex items-center space-x-2" title="Recarregar informações e episódios da API">
+                        <i id="icone-recarregar" class="fa-solid fa-rotate"></i>
+                        <span>Recarregar Info</span>
+                    </button>
+                    <button onclick="openEditItemModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Editar Título</span>
+                    </button>
+                    <span id="detalhe-status-badge" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Não Concluído</span>
+                </div>
+            </header>
+            <div id="detalhe-conteudo" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-8"></div>
+        </section>
+
+        <section id="tab-contas" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold">Gestão Financeira</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Contas da Casa</h2>
+                </div>
+                <button id="btn-add-contas" onclick="openAccessModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Adicionar Conta</span>
+                </button>
+            </header>
+            <div id="grid-contas-casa" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+        </section>
+
+        <section id="tab-senhas" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Segurança & Portais</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Senhas e Acessos das Casas</h2>
+                </div>
+                <button id="btn-add-senhas" onclick="openAccessModal()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Adicionar Acesso</span>
+                </button>
+            </header>
+            <div id="grid-acessos" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+        </section>
+
+        <section id="tab-senhas-pessoais" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-purple-400 font-bold">Cofre Pessoal</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Senhas e Contas Pessoais</h2>
+                </div>
+                <button onclick="openPersonalPassModal()" class="bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-purple-600/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Adicionar Credencial</span>
+                </button>
+            </header>
+            <div id="grid-senhas-pessoais" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="tab-administrador" class="hidden space-y-8">
+            <header class="bg-slate-900/60 border border-slate-800/60 p-6 rounded-2xl backdrop-blur-md shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-blue-400 font-bold">Painel de Controlo</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Administração do Sistema</h2>
+                </div>
+                <button id="btn-add-admin-container" onclick="openAdminModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Adicionar Administrador</span>
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-users-gear text-blue-400 mr-2"></i> Administradores Registados
+                    </h3>
+                    <div id="lista-admins" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAIS DO SISTEMA -->
+    <div id="media-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 id="modal-title" class="text-xl font-bold text-white">Adicionar Novo Título</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="media-form" onsubmit="handleFormSubmit(event)" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Filme / Série / Anime</label>
+                    <input type="text" id="input-nome" required placeholder="Ex: Naruto, Solo Leveling, Interstellar..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
+                    <select id="input-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="Filme">Filme</option>
+                        <option value="Série">Série</option>
+                        <option value="Anime">Anime</option>
+                    </select>
+                </div>
+
+                <!-- Barra de Progresso de Carregamento -->
+                <div id="loading-progress-container" class="hidden space-y-2 pt-2">
+                    <div class="flex justify-between text-xs text-blue-400 font-medium">
+                        <span id="loading-status-text">A consultar catálogo e a traduzir...</span>
+                        <span id="loading-percent-text">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                        <div id="loading-bar-fill" class="bg-gradient-to-r from-blue-600 to-indigo-500 h-full w-0 transition-all duration-300 rounded-full"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-media" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20 flex items-center space-x-2">
+                        <span>Salvar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR TÍTULO, INFORMAÇÕES E EPISÓDIOS -->
+    <div id="edit-item-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-8 shadow-2xl space-y-6 my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Informações & Episódios</h3>
+                <button onclick="closeEditItemModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="edit-item-form" onsubmit="handleEditItemSubmit(event)" class="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Dados Principais</h4>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Título</label>
+                        <input type="text" id="edit-item-nome" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Categoria (Tipo)</label>
+                            <select id="edit-item-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                                <option value="Filme">Filme</option>
+                                <option value="Série">Série</option>
+                                <option value="Anime">Anime</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Gênero</label>
+                            <input type="text" id="edit-item-genero" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Lançamento</label>
+                            <input type="date" id="edit-item-lancamento" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Término</label>
+                            <input type="text" id="edit-item-termino" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Temporadas</label>
+                            <input type="number" id="edit-item-temporadas" min="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">URL do Poster (Imagem)</label>
+                        <input type="text" id="edit-item-poster" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4 space-y-4">
+                    <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-file-excel mr-1.5 text-emerald-400"></i> Colar Episódios em Massa (Excel / Planilha)
+                    </h4>
+                    
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <p class="text-[11px] text-slate-400">
+                            Pode copiar as colunas diretamente de uma tabela (ex: Temporada | Episódio | Título) e colar no campo abaixo:
+                        </p>
+                        <textarea id="manual-textarea-massa" rows="4" placeholder="Cole aqui os dados copiados da tabela..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-blue-500"></textarea>
+                        
+                        <div class="flex justify-end">
+                            <button type="button" onclick="processarColagemMassa()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg flex items-center space-x-1.5">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Adicionar Episódios Colados</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase">Episódios Cadastrados Atualmente:</label>
+                        <div id="lista-episodios-modal" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeEditItemModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR ACESSO (GERAL) -->
+    <div id="access-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-shield-halved text-amber-400 mr-2"></i> Adicionar Novo Acesso</h3>
+                <button onclick="closeAccessModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="access-form" onsubmit="handleAccessSubmit(event)" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome da Propriedade / Casa</label>
+                    <input type="text" id="acc-nome" required placeholder="Ex: Casa Principal - 235" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
+                    <input type="text" id="acc-morada" placeholder="Ex: Rua Dos Crisântemos - Morro Estevão" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
+                    <select id="acc-tipo" onchange="verificarNovoTipoConta(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                        <option value="Energia / Luz">Energia / Luz</option>
+                        <option value="Água / Saneamento">Água / Saneamento</option>
+                        <option value="Internet / Outros">Internet / Outros</option>
+                        <option value="novo">+ Novo Tipo</option>
+                    </select>
+                </div>
+                <div id="container-novo-tipo" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Novo Tipo de Conta</label>
+                    <input type="text" id="acc-novo-tipo-input" placeholder="Ex: Gás, IPTU, Condomínio..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
+                    <input type="text" id="acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
+                    <input type="text" id="acc-portal" placeholder="https://exemplo.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / UC / Email</label>
+                        <input type="text" id="acc-login" placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">CPF</label>
+                        <input type="text" id="acc-cpf" placeholder="000.000.000-00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Matrícula</label>
+                        <input type="text" id="acc-matricula" placeholder="Nº da Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                        <input type="text" id="acc-senha" placeholder="Senha de acesso" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeAccessModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20">Salvar Acesso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR ACESSO -->
+    <div id="edit-access-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-8 shadow-2xl space-y-6 my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Editar Acesso / Conta</h3>
+                <button onclick="closeEditAccessModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="edit-access-form" onsubmit="handleEditAccessSubmit(event)" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <input type="hidden" id="edit-acc-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome da Propriedade / Casa</label>
+                    <input type="text" id="edit-acc-nome" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Morada / Localização</label>
+                    <input type="text" id="edit-acc-morada" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tipo de Conta</label>
+                    <select id="edit-acc-tipo" onchange="verificarNovoTipoEdicao(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                        <option value="Energia / Luz">Energia / Luz</option>
+                        <option value="Água / Saneamento">Água / Saneamento</option>
+                        <option value="Internet / Outros">Internet / Outros</option>
+                        <option value="novo">+ Novo Tipo</option>
+                    </select>
+                </div>
+                <div id="container-novo-tipo-edit" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome do Novo Tipo de Conta</label>
+                    <input type="text" id="edit-acc-novo-tipo-input" placeholder="Ex: Gás, IPTU, Condomínio..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome Para Aparecer em Vez De Link</label>
+                    <input type="text" id="edit-acc-nome-site" placeholder="Ex: Portal Coopera, Casan..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Site (Link do Portal URL)</label>
+                    <input type="text" id="edit-acc-portal" placeholder="https://exemplo.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / UC / Email</label>
+                        <input type="text" id="edit-acc-login" placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">CPF</label>
+                        <input type="text" id="edit-acc-cpf" placeholder="000.000.000-00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Matrícula</label>
+                        <input type="text" id="edit-acc-matricula" placeholder="Nº da Matrícula" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                        <input type="text" id="edit-acc-senha" placeholder="Senha de acesso" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeEditAccessModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADICIONAR / EDITAR SENHAS PESSOAIS -->
+    <div id="personal-pass-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 id="personal-modal-title" class="text-xl font-bold text-white"><i class="fa-solid fa-key text-purple-400 mr-2"></i> Nova Credencial Pessoal</h3>
+                <button onclick="closePersonalPassModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="personal-pass-form" onsubmit="handlePersonalPassSubmit(event)" class="space-y-4">
+                <input type="hidden" id="personal-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Serviço / Site / App</label>
+                    <input type="text" id="pers-servico" required placeholder="Ex: GitHub, Banco, E-mail..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">URL (Link Opcional)</label>
+                    <input type="text" id="pers-url" placeholder="https://exemplo.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Utilizador / Login / E-mail</label>
+                    <input type="text" id="pers-login" required placeholder="Ex: utilizador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha</label>
+                    <input type="text" id="pers-senha" required placeholder="Digite ou gere a senha" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500">
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closePersonalPassModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-purple-600/20">Salvar Credencial</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CADASTRO DE ADMINISTRADOR -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-user-shield text-blue-400 mr-2"></i> Novo Administrador</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="admin-form" onsubmit="handleAdminSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome / Identificação</label>
+                    <input type="text" id="adm-nome" required placeholder="Ex: Administrador" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / Utilizador</label>
+                    <input type="text" id="adm-login" required placeholder="Ex: admin" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha de Acesso</label>
+                    <input type="password" id="adm-senha" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="pt-2">
+                    <label class="flex items-center space-x-3 bg-slate-950 border border-slate-800/80 p-3.5 rounded-xl cursor-pointer select-none hover:border-slate-700 transition">
+                        <input type="checkbox" id="adm-vip" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">Definir como Administrador VIP</span>
+                            <span class="text-slate-400">Atribui privilégios e distintivo VIP à conta.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-blue-600/20">Cadastrar Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR ADMINISTRADOR -->
+    <div id="edit-admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-user-pen text-amber-400 mr-2"></i> Editar Administrador</h3>
+                <button onclick="closeEditAdminModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="edit-admin-form" onsubmit="handleEditAdminSubmit(event)" class="space-y-4">
+                <input type="hidden" id="edit-adm-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nome / Identificação</label>
+                    <input type="text" id="edit-adm-nome" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / Utilizador</label>
+                    <input type="text" id="edit-adm-login" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nova Senha (ou manter atual)</label>
+                    <input type="text" id="edit-adm-senha" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="pt-2">
+                    <label class="flex items-center space-x-3 bg-slate-950 border border-slate-800/80 p-3.5 rounded-xl cursor-pointer select-none hover:border-slate-700 transition">
+                        <input type="checkbox" id="edit-adm-vip" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">Definir como Administrador VIP</span>
+                            <span class="text-slate-400">Atribui privilégios e distintivo VIP à conta.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeEditAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm px-5 py-2.5 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition shadow-lg shadow-amber-600/20">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE LOGIN -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+            <div class="inline-block p-4 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
+                <i class="fa-solid fa-lock text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-white">Acesso Restrito</h3>
+                <p id="auth-tab-name" class="text-xs text-slate-400 mt-1">Insira o login e senha de administrador.</p>
+            </div>
+            
+            <form onsubmit="verificarLoginSenhaTab(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Login / Utilizador</label>
+                    <input type="text" id="input-login-auth" required placeholder="Digite o seu login" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Senha de Acesso</label>
+                    <input type="password" id="input-senha-auth" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs py-3 rounded-xl transition shadow-lg shadow-amber-600/20">Desbloquear</button>
+                    <button type="button" onclick="closeAuthModal(); switchTab('home');" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs py-3 rounded-xl transition">Voltar para Início</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script JS Externo (script.js) -->
+    <script src="js/script.js"></script>
+</body>
+</html>

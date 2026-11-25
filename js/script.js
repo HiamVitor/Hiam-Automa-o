@@ -291,6 +291,101 @@ async function traduzirParaPortugues(texto) {
     return texto;
 }
 
+// ==========================================
+// INTEGRAÇÃO COM ANILIST API (PARA ANIMES)
+// ==========================================
+async function buscarAnimeAniList(nomeInput) {
+    const query = `
+        query ($search: String) {
+            Media (search: $search, type: ANIME) {
+                id
+                title {
+                    romaji
+                    english
+                    native
+                }
+                description
+                episodes
+                format
+                startDate {
+                    year
+                    month
+                    day
+                }
+                endDate {
+                    year
+                    month
+                    day
+                }
+                coverImage {
+                    large
+                }
+                genres
+                status
+            }
+        }
+    `;
+
+    const variables = { search: nomeInput };
+
+    try {
+        const response = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ query, variables })
+        });
+
+        if (response.ok) {
+            const resultado = await response.json();
+            const media = resultado.data && resultado.data.Media;
+
+            if (media) {
+                let dataLancamento = "2024-01-01";
+                if (media.startDate && media.startDate.year) {
+                    const ano = media.startDate.year;
+                    const mes = String(media.startDate.month || 1).padStart(2, '0');
+                    const dia = String(media.startDate.day || 1).padStart(2, '0');
+                    dataLancamento = `${ano}-${mes}-${dia}`;
+                }
+
+                let resumoLimpo = media.description ? media.description.replace(/<[^>]*>?/gm, '') : "Sem resumo disponível.";
+                if (resumoLimpo.length > 450) {
+                    resumoLimpo = resumoLimpo.substring(0, 447) + "...";
+                }
+
+                const tituloFinal = media.title.english || media.title.romaji || nomeInput;
+                const totalEps = media.episodes || 1;
+                const epsArray = [];
+                for (let i = 1; i <= totalEps; i++) {
+                    epsArray.push({
+                        nome: `Episódio ${i}`,
+                        assistido: false,
+                        dataCheck: ""
+                    });
+                }
+
+                return {
+                    nome: tituloFinal,
+                    tipo: 'Anime',
+                    genero: media.genres ? media.genres.join(' / ') : 'Anime / Ação',
+                    resumo: resumoLimpo,
+                    lancamento: dataLancamento,
+                    termino: media.status === 'FINISHED' ? 'Finalizado' : 'Em andamento',
+                    temporadas: 1,
+                    poster: media.coverImage ? media.coverImage.large : "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=500&auto=format&fit=crop",
+                    temporadasDados: { "1": epsArray }
+                };
+            }
+        }
+    } catch (e) {
+        console.error("Erro ao consultar a AniList API:", e);
+    }
+    return null;
+}
+
 async function handleFormSubmit(event) {
     event.preventDefault();
     const nomeInput = document.getElementById('input-nome').value.trim();
@@ -325,42 +420,56 @@ async function handleFormSubmit(event) {
     try {
         progressFill.style.width = '50%';
         progressPercent.innerText = '50%';
-        statusText.innerText = 'A obter episódios e resumos...';
 
-        const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
-        if (response.ok) {
-            const show = await response.json();
-            if (show.genres && show.genres.length > 0) {
-                dadosMidia.genero = await traduzirParaPortugues(show.genres.join(" / "));
+        if (tipo === 'Anime') {
+            statusText.innerText = 'A consultar catálogo AniList...';
+            const dadosAniList = await buscarAnimeAniList(nomeInput);
+            if (dadosAniList) {
+                dadosMidia.genero = dadosAniList.genero;
+                dadosMidia.resumo = dadosAniList.resumo;
+                dadosMidia.lancamento = dadosAniList.lancamento;
+                dadosMidia.termino = dadosAniList.termino;
+                dadosMidia.poster = dadosAniList.poster;
+                dadosMidia.temporadasDados = dadosAniList.temporadasDados;
+                dadosMidia.temporadas = dadosAniList.temporadas;
             }
-            let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : dadosMidia.resumo;
-            let resumoTraduzido = await traduzirParaPortugues(resumoOriginal);
-            if (resumoTraduzido.length > 450) {
-                resumoTraduzido = resumoTraduzido.substring(0, 447) + "...";
-            }
-            dadosMidia.resumo = resumoTraduzido;
-            dadosMidia.lancamento = show.premiered || "2024-01-01";
-            dadosMidia.termino = show.ended || "Em andamento";
-            if (show.image && show.image.original) dadosMidia.poster = show.image.original;
-
-            progressFill.style.width = '80%';
-            progressPercent.innerText = '80%';
-            statusText.innerText = 'A traduzir conteúdos para português...';
-
-            if (show._embedded && Array.isArray(show._embedded.episodes)) {
-                const temporadasMap = {};
-                for (const ep of show._embedded.episodes) {
-                    const tempNum = ep.season || 1;
-                    if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
-                    let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
-                    temporadasMap[tempNum].push({
-                        nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
-                        assistido: false,
-                        dataCheck: ""
-                    });
+        } else {
+            statusText.innerText = 'A obter episódios e resumos...';
+            const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(nomeInput)}&embed=episodes`);
+            if (response.ok) {
+                const show = await response.json();
+                if (show.genres && show.genres.length > 0) {
+                    dadosMidia.genero = await traduzirParaPortugues(show.genres.join(" / "));
                 }
-                dadosMidia.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
-                dadosMidia.temporadas = Object.keys(dadosMidia.temporadasDados).length || 1;
+                let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : dadosMidia.resumo;
+                let resumoTraduzido = await traduzirParaPortugues(resumoOriginal);
+                if (resumoTraduzido.length > 450) {
+                    resumoTraduzido = resumoTraduzido.substring(0, 447) + "...";
+                }
+                dadosMidia.resumo = resumoTraduzido;
+                dadosMidia.lancamento = show.premiered || "2024-01-01";
+                dadosMidia.termino = show.ended || "Em andamento";
+                if (show.image && show.image.original) dadosMidia.poster = show.image.original;
+
+                progressFill.style.width = '80%';
+                progressPercent.innerText = '80%';
+                statusText.innerText = 'A traduzir conteúdos para português...';
+
+                if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                    const temporadasMap = {};
+                    for (const ep of show._embedded.episodes) {
+                        const tempNum = ep.season || 1;
+                        if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                        let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                        temporadasMap[tempNum].push({
+                            nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                            assistido: false,
+                            dataCheck: ""
+                        });
+                    }
+                    dadosMidia.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                    dadosMidia.temporadas = Object.keys(dadosMidia.temporadasDados).length || 1;
+                }
             }
         }
     } catch (e) {
@@ -407,36 +516,52 @@ async function recarregarInformacoesTitulo() {
     if (icone) icone.classList.add('fa-spin');
 
     try {
-        const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
-        if (response.ok) {
-            const show = await response.json();
-            if (show.genres && show.genres.length > 0) {
-                item.genero = await traduzirParaPortugues(show.genres.join(" / "));
+        if (item.tipo === 'Anime') {
+            const dadosAniList = await buscarAnimeAniList(item.nome);
+            if (dadosAniList) {
+                item.genero = dadosAniList.genero;
+                item.resumo = dadosAniList.resumo;
+                item.lancamento = dadosAniList.lancamento;
+                item.termino = dadosAniList.termino;
+                item.poster = dadosAniList.poster;
+                item.temporadasDados = dadosAniList.temporadasDados;
+                item.temporadas = dadosAniList.temporadas;
+                salvarNoLocalStorage();
+                renderizarConteudoDetalhes();
+                alert("Informações do anime recarregadas com sucesso via AniList!");
             }
-            let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
-            item.resumo = await traduzirParaPortugues(resumoOriginal);
-            item.lancamento = show.premiered || item.lancamento;
-            item.termino = show.ended || item.termino;
-            if (show.image && show.image.original) item.poster = show.image.original;
-
-            if (show._embedded && Array.isArray(show._embedded.episodes)) {
-                const temporadasMap = {};
-                for (const ep of show._embedded.episodes) {
-                    const tempNum = ep.season || 1;
-                    if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
-                    let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
-                    temporadasMap[tempNum].push({
-                        nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
-                        assistido: false,
-                        dataCheck: ""
-                    });
+        } else {
+            const response = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(item.nome)}&embed=episodes`);
+            if (response.ok) {
+                const show = await response.json();
+                if (show.genres && show.genres.length > 0) {
+                    item.genero = await traduzirParaPortugues(show.genres.join(" / "));
                 }
-                item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
-                item.temporadas = Object.keys(item.temporadasDados).length || 1;
+                let resumoOriginal = show.summary ? show.summary.replace(/<[^>]*>?/gm, '') : item.resumo;
+                item.resumo = await traduzirParaPortugues(resumoOriginal);
+                item.lancamento = show.premiered || item.lancamento;
+                item.termino = show.ended || item.termino;
+                if (show.image && show.image.original) item.poster = show.image.original;
+
+                if (show._embedded && Array.isArray(show._embedded.episodes)) {
+                    const temporadasMap = {};
+                    for (const ep of show._embedded.episodes) {
+                        const tempNum = ep.season || 1;
+                        if (!temporadasMap[tempNum]) temporadasMap[tempNum] = [];
+                        let nomeEpTraduzido = await traduzirParaPortugues(ep.name || 'Sem título');
+                        temporadasMap[tempNum].push({
+                            nome: `Episódio ${ep.number}: ${nomeEpTraduzido}`,
+                            assistido: false,
+                            dataCheck: ""
+                        });
+                    }
+                    item.temporadasDados = normalizarTemporadasSequenciais(temporadasMap);
+                    item.temporadas = Object.keys(item.temporadasDados).length || 1;
+                }
+                salvarNoLocalStorage();
+                renderizarConteudoDetalhes();
+                alert("Informações recarregadas com sucesso!");
             }
-            salvarNoLocalStorage();
-            renderizarConteudoDetalhes();
-            alert("Informações recarregadas com sucesso!");
         }
     } catch (e) {
         console.error("Erro ao recarregar:", e);
